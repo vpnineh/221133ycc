@@ -5,12 +5,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/setup-claude-seo.sh\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/setup-skills.sh\"",
             "timeout": 900
           },
           {
             "type": "command",
-            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/setup-skills.sh\"",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/scripts/setup-claude-seo.sh\"",
             "timeout": 900
           }
         ]
