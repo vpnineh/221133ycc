@@ -22,10 +22,11 @@ Both are idempotent. Measured: a warm session is ~7ms, a cold one 2m6s.
 | `coreyhaines31/marketingskills` | 50 |
 | `JuliusBrussee/caveman` | 17 |
 | `AgriciDaniel/claude-seo` | 31 |
+| `Graphify-Labs/graphify` (PyPI `graphifyy`) | 1 |
 
-Global CLIs: `@playwright/cli`, `ruflo`.
+Global CLIs: `@playwright/cli`, `ruflo`, `graphify`.
 
-128 skills. Their descriptions plus the routing guide add about 21 KB
+129 skills. Their descriptions plus the routing guide add about 21 KB
 (~5,200 tokens) to the start of every session. Trim `BUNDLES` in
 `setup-skills.sh` if that budget matters more than the coverage.
 
@@ -40,6 +41,23 @@ claude-seo hook, so both survive. Do not reorder the hooks.
 **`caveman` / `caveman-review`** — already uploaded as account-level skills,
 which reach every chat rather than only Claude Code sessions. The hook deletes
 the local copies so one trigger does not fire two skills.
+
+## graphify — always on
+
+`setup-skills.sh` installs the `graphify` CLI (`uv tool install graphifyy`),
+then runs `graphify install` **after** writing the routing guide, because the
+guide's heredoc rewrites `~/.claude/CLAUDE.md` and would drop graphify's
+always-on block. It then builds a code graph of the session's project
+(`graphify update .`, tree-sitter, no LLM, a few seconds) into
+`graphify-out/`, which is gitignored.
+
+The PreToolUse hooks that make Claude use the graph are in
+`.claude/settings.json`, not in the script: Claude Code reads hooks once at
+startup, before SessionStart hooks run. `Bash|Grep` gets a nudge to run
+`graphify query` first; `Read|Glob` runs in strict mode, which blocks the
+first raw source read of a session until one query has run, then only nudges.
+Set `GRAPHIFY_HOOK_STRICT=0` to keep only the nudge. Both hooks are silent
+no-ops when graphify is missing or the project has no graph.
 
 ## Routing
 

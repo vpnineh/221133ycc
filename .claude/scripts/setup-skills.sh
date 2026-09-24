@@ -148,6 +148,36 @@ pure-prose ones — `investigate-first`, `safe-refactor`, `surgical-patch`,
 over training data for API signatures and config. In this environment
 `context7.com` is blocked by the egress policy, so they fail at the fetch step
 — say so rather than answering from memory.
+
+## Codebase navigation — graphify
+
+The session hook builds a code knowledge graph of the project at start
+(`graphify-out/graph.json`, tree-sitter, no LLM). Before grepping or reading
+files to understand code, run `graphify query "<question>"`, then
+`graphify explain "<symbol>"` or `graphify path "<A>" "<B>"`; read raw files
+only to edit or debug specific lines. After changing code, refresh with
+`graphify update .`. For docs, PDFs and images too, run the `graphify` skill
+(`/graphify .`). Tell subagents that explore code to do the same.
 ROUTING
+
+# graphify (Graphify-Labs/graphify): code/docs knowledge graph + Claude Code
+# skill. `graphify install` copies the skill and appends its always-on block to
+# ~/.claude/CLAUDE.md, so it has to run AFTER the routing heredoc above, which
+# rewrites that file. The PreToolUse hooks that make Claude query the graph
+# live in .claude/settings.json (hooks are read at startup, before this runs).
+export PATH="${HOME}/.local/bin:${PATH}"
+if ! command -v graphify >/dev/null 2>&1; then
+    log "installing graphify..."
+    { uv tool install graphifyy || pip install --quiet graphifyy; } >/dev/null 2>&1 || \
+        log "WARN: graphify did not install cleanly"
+fi
+if command -v graphify >/dev/null 2>&1; then
+    (cd "${HOME}" && graphify install >/dev/null 2>&1) || log "WARN: graphify skill registration failed"
+    # Code graph of the session's project: local and deterministic, seconds.
+    if [ -n "${CLAUDE_PROJECT_DIR:-}" ] && [ -d "${CLAUDE_PROJECT_DIR}" ]; then
+        (cd "${CLAUDE_PROJECT_DIR}" && graphify update . >/dev/null 2>&1) || \
+            log "WARN: graphify graph build failed"
+    fi
+fi
 
 log "done: $(ls "${SKILLS_DIR}" | grep -cv '^synced$') skills available, routing guide written"
