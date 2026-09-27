@@ -6,6 +6,12 @@ name: Skills drift check
 # between bundles, and SKILLS.md drifting from what actually installs.
 #
 # Runs daily, opens one PR when something changed, and does nothing otherwise.
+#
+# Step order is load-bearing:
+#   - the pin is bumped BEFORE claude-seo installs, so a PR proposing a new
+#     version has actually installed that version
+#   - drift is checked BEFORE SKILLS.md is regenerated; afterwards the check
+#     compares the file against itself and can only ever say "no drift"
 
 on:
   schedule:
@@ -35,19 +41,14 @@ jobs:
         with:
           python-version: '3.11'
 
+      # SKILLS_STRICT makes a bundle that fails to install fail the job. A live
+      # session tolerates that and starts with what it has; this job must not,
+      # or it goes on to propose an inventory with those skills deleted.
       - name: Install the skill bundles
         env:
           CLAUDE_PROJECT_DIR: ${{ github.workspace }}
+          SKILLS_STRICT: '1'
         run: bash .claude/scripts/setup-skills.sh
-
-      # claude-seo's own installer. Its Chromium step needs the pre-installed
-      # browser this CI runner does not have, and the setup script tolerates
-      # that; the skill files, which is all the inventory needs, still land.
-      - name: Install claude-seo
-        env:
-          CLAUDE_PROJECT_DIR: ${{ github.workspace }}
-        continue-on-error: true
-        run: bash .claude/scripts/setup-claude-seo.sh
 
       - name: Bump the claude-seo pin if upstream released
         id: pin
@@ -70,14 +71,16 @@ jobs:
             echo "claude-seo ${current} is current"
           fi
 
-      - name: Regenerate the inventory
+      # Installs whatever the pin now says. No continue-on-error: if a newly
+      # bumped version does not install, the job fails instead of proposing it.
+      # The Chromium wiring is skipped here — runners have no pre-installed
+      # browser — so this proves the install, not the wiring.
+      - name: Install claude-seo at the (possibly bumped) pin
         env:
           CLAUDE_PROJECT_DIR: ${{ github.workspace }}
-        run: bash .claude/scripts/list-skills.sh
+        run: bash .claude/scripts/setup-claude-seo.sh
 
-      # The report is the useful output whether or not it finds anything, so a
-      # non-zero exit here is a finding, not a build failure.
-      - name: Check for drift
+      - name: Check for drift against the committed inventory
         id: drift
         env:
           CLAUDE_PROJECT_DIR: ${{ github.workspace }}
@@ -93,6 +96,27 @@ jobs:
             cat drift-report.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Regenerate the inventory
+        env:
+          CLAUDE_PROJECT_DIR: ${{ github.workspace }}
+        run: bash .claude/scripts/list-skills.sh
+
+      # Last line of defence. A healthy day moves a handful of skills; a large
+      # drop means installs broke, not that upstream deleted half its skills.
+      # Refuse to propose it.
+      - name: Refuse an inventory that collapsed
+        run: |
+          count() { sed '/^## Account level/,$d' "$1" | grep -c '^- \*\*' || true; }
+          git show HEAD:.claude/SKILLS.md > /tmp/committed.md
+          before=$(count /tmp/committed.md)
+          after=$(count .claude/SKILLS.md)
+          echo "skills: committed=${before} now=${after}"
+          if [ "${before}" -gt 0 ] && [ $(( after * 100 / before )) -lt 90 ]; then
+            echo "::error::Inventory fell from ${before} to ${after} skills (>10% drop)." \
+                 "That is an install failure, not upstream drift. Not opening a PR."
+            exit 1
+          fi
 
       - name: Open a PR if anything changed
         env:
@@ -120,9 +144,13 @@ jobs:
             echo
             if [ "${PIN_BUMPED}" = "true" ]; then
               echo "Bumped the claude-seo pin from \`${PIN_FROM}\` to \`${PIN_TO}\`."
+              echo "CI installed \`${PIN_TO}\` successfully, but runners have no"
+              echo "pre-installed browser, so the Chromium wiring was not exercised."
+              echo "After merging, confirm \`claude-seo doctor\` reports"
+              echo "\`Chromium: ready\` in the next web session."
               echo
             fi
-            echo "Drift report from this run:"
+            echo "Drift report from this run, against the committed inventory:"
             echo
             echo '```'
             cat drift-report.txt
@@ -134,5 +162,7 @@ jobs:
 
           git commit -q -m "${title}" \
             -m "Automated by .github/workflows/skills-update.yml. See the PR body for this run's drift report."
-          git push -q -u origin "${branch}"
-          gh pr create --head "${branch}" --title "${title}" --body-file pr-body.md
+          # --force: a same-day re-run reuses the branch name, and this job owns it.
+          git push -q --force -u origin "${branch}"
+          gh pr create --head "${branch}" --title "${title}" --body-file pr-body.md \
+            || gh pr edit "${branch}" --title "${title}" --body-file pr-body.md

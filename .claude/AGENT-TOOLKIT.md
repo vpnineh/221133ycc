@@ -23,12 +23,12 @@ Both are idempotent. Measured: a warm session is ~7ms, a cold one 2m6s.
 | `JuliusBrussee/caveman` | 17 |
 | `emilkowalski/skills` | 13 |
 | `aaron-he-zhu/aaron-marketing-skills` (seo-geo arm only) | 16 |
-| `AgriciDaniel/claude-seo` | 31 |
+| `AgriciDaniel/claude-seo` (v2.4.0) | 33 |
 | `Graphify-Labs/graphify` (PyPI `graphifyy`) | 1 |
 
 Global CLIs: `@playwright/cli`, `ruflo`, `graphify`.
 
-158 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
+159 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
 routing guide add about 30 KB (~7,400 tokens) to the start of every session. Trim `BUNDLES` in
 `setup-skills.sh` if that budget matters more than the coverage.
 
@@ -39,6 +39,18 @@ exact name, and they land on the same path. Whichever installs last silently
 wins; marketingskills did, which cost us claude-seo's orchestrator. The skills
 hook now renames the marketing one to `marketing-seo-audit` and runs before the
 claude-seo hook, so both survive. Do not reorder the hooks.
+
+The two are told apart by the `author: AgriciDaniel` metadata field, never by
+description text. The first version grepped for "subagent delegation"; claude-seo
+v2.4.0 rewrote that description, and on the next resume the hook took
+claude-seo's orchestrator for the marketing one, deleted the real
+`marketing-seo-audit` and moved claude-seo's into its place. Authorship is
+stable across releases; prose is not.
+
+The claude-seo hook also treats a `seo-audit` it does not own as unhealthy and
+reinstalls, so an overwrite heals on the next session instead of persisting —
+`claude-seo doctor` checks the runtime, not the skill files, and would report
+healthy either way.
 
 **`caveman` / `caveman-review`** — already uploaded as account-level skills,
 which reach every chat rather than only Claude Code sessions. The hook deletes
@@ -77,6 +89,21 @@ uses `-xtype d`, and anything walking that tree must too.
 overlapping skills — six cover frontend design alone, and two separate SEO
 systems are installed side by side. Edit it in the heredoc at the bottom of
 the script, not in place; it is regenerated every run.
+
+## CI-only failure modes
+
+The drift workflow starts from an empty HOME without Claude Code installed.
+Three things that never happen in a session break there, all now handled:
+
+- `npx skills add` picks target agents by detecting installed binaries. With no
+  `claude` on PATH it installs everywhere except `~/.claude/skills`. Hence
+  `-a claude-code -y` on every call — the first CI run landed 1 skill of 125.
+- The CLI exits 0 even on `Invalid agents`, so its status proves nothing. The
+  hook checks that each bundle's marker skill exists afterwards, and with
+  `SKILLS_STRICT=1` (set in CI) a missing one fails the job.
+- `ls` exits 2 on a missing path, and under `pipefail` that kills a script from
+  inside an innocent-looking `$(ls … | head)`. Neither script pipes `ls` any
+  more.
 
 ## Daily drift check
 

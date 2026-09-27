@@ -41,26 +41,47 @@ BUNDLES=(
 # keeps the file it already has.
 PROV="${HOME}/.claude/skills-provenance.tsv"
 
+failed=()
+
 for spec in "${BUNDLES[@]}"; do
     IFS='|' read -r marker target extra <<< "${spec}"
     if [ -d "${SKILLS_DIR}/${marker}" ]; then
         continue
     fi
     log "installing ${target}..."
-    before=$(ls "${SKILLS_DIR}" 2>/dev/null | sort)
+    before=$(find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 -printf '%f\n' | sort)
+    # `-a claude-code` is required, not optional. Without it the CLI picks
+    # agents by detecting installed binaries; where Claude Code is not on PATH
+    # (CI) it installs to other agents and nothing reaches ~/.claude/skills.
+    # `-y` because a multi-skill repo otherwise stops at a selection prompt.
     # shellcheck disable=SC2086
-    npx -y skills add "${target}" ${extra} -g >/dev/null 2>&1 || \
-        log "WARN: ${target} did not install cleanly"
-    comm -13 <(echo "${before}") <(ls "${SKILLS_DIR}" 2>/dev/null | sort) | \
-        while read -r s; do [ -n "${s}" ] && printf '%s\t%s\n' "${s}" "${target}"; done >> "${PROV}"
+    out=$(npx -y skills add "${target}" ${extra} -g -a claude-code -y </dev/null 2>&1) || true
+    # The CLI's exit code cannot be trusted: it exits 0 even on "Invalid
+    # agents". Whether the marker skill exists afterwards is the only real test.
+    if [ ! -d "${SKILLS_DIR}/${marker}" ]; then
+        failed+=("${target}")
+        log "FAIL: ${target} — marker skill '${marker}' did not appear"
+        printf '%s\n' "${out}" | grep -vE '^npm notice' | tail -8 | sed 's/^/    /'
+    fi
+    comm -13 <(echo "${before}") \
+             <(find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 -printf '%f\n' | sort) | \
+        while read -r s; do
+            if [ -n "${s}" ]; then printf '%s\t%s\n' "${s}" "${target}"; fi
+        done >> "${PROV}"
 done
 
 # marketingskills ships a skill literally named seo-audit, which lands on the
 # same path as claude-seo's orchestrator of the same name. Whichever installs
 # last silently wins. Rename the marketing one so both survive; this hook runs
 # before the claude-seo hook, so claude-seo then installs its own cleanly.
+#
+# Tell them apart by authorship, never by description text. This used to grep
+# for "subagent delegation"; claude-seo v2.4.0 rewrote that description, so on
+# the next resume this block took claude-seo's own orchestrator for the
+# marketing one, deleted the real marketing-seo-audit and moved claude-seo's
+# into its place. The author field is stable across releases; prose is not.
 MK="${SKILLS_DIR}/seo-audit"
-if [ -f "${MK}/SKILL.md" ] && ! grep -q "subagent delegation" "${MK}/SKILL.md"; then
+if [ -f "${MK}/SKILL.md" ] && ! grep -qE '^[[:space:]]+author:[[:space:]]*"?AgriciDaniel' "${MK}/SKILL.md"; then
     log "renaming marketingskills' seo-audit -> marketing-seo-audit"
     rm -rf "${SKILLS_DIR}/marketing-seo-audit"
     mv "${MK}" "${SKILLS_DIR}/marketing-seo-audit"
@@ -86,14 +107,14 @@ for pkg in "@playwright/cli:playwright-cli" "ruflo:ruflo"; do
     npm install -g "${name}@latest" >/dev/null 2>&1 || log "WARN: ${name} failed"
 done
 
-# Routing guidance. With ~157 skills installed, several cover overlapping
+# Routing guidance. With ~160 skills installed, several cover overlapping
 # ground and the description text alone does not separate them. This lands at
 # user scope so it applies to every project in the container, not just this
 # repo. Regenerated each run; the container is ephemeral anyway.
 cat > "${HOME}/.claude/CLAUDE.md" <<'ROUTING'
 # Skill routing
 
-Roughly 157 skills are installed here and several overlap. Pick by the shape of
+Roughly 160 skills are installed here and several overlap. Pick by the shape of
 the task, not by keyword match on the skill name. When two fit, prefer the
 narrower one.
 
@@ -184,6 +205,13 @@ Which of the three:
   environment, see below — or when the user has GSC/GA4 exports to work from
 - marketingskills for channel strategy above the page level
 
+Two overlaps worth splitting. AI search has three skills: `seo-geo` (claude-seo)
+and `geo-content-optimizer` (aaron) make content citable by answer engines,
+while `seo-agentic` (claude-seo, v2.4.0) makes a site operable by agents —
+robots.txt Content-Signal, llms.txt, /.well-known discovery, WebMCP.
+marketingskills' `ai-seo` spans both, as strategy. And for analytics,
+`seo-matomo` is the Matomo counterpart to `seo-google`'s GA4.
+
 In this environment claude-seo cannot fetch URLs: its SSRF guard refuses the
 loopback egress proxy. So prefer the aaron seo-geo skills here, or fetch the
 page with WebFetch and hand the content to claude-seo.
@@ -250,4 +278,17 @@ if command -v graphify >/dev/null 2>&1; then
     fi
 fi
 
-log "done: $(ls "${SKILLS_DIR}" | grep -cv '^synced$') skills available, routing guide written"
+# find|wc rather than ls|grep -c: grep -c exits 1 on a zero count, which
+# pipefail would turn into a dead script at exactly the moment it matters.
+n=$(find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 ! -name synced -xtype d | wc -l)
+log "done: ${n} skills available, routing guide written"
+
+if [ "${#failed[@]}" -gt 0 ]; then
+    log "${#failed[@]} bundle(s) failed: ${failed[*]}"
+    # A live session should still start with whatever did install. CI sets
+    # SKILLS_STRICT=1 so a broken install fails the job instead of quietly
+    # proposing an inventory with most of its skills missing.
+    if [ "${SKILLS_STRICT:-0}" = "1" ]; then
+        exit 1
+    fi
+fi
