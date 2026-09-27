@@ -28,7 +28,7 @@ Both are idempotent. Measured: a warm session is ~7ms, a cold one 2m6s.
 
 Global CLIs: `@playwright/cli`, `ruflo`, `graphify`.
 
-157 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
+158 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
 routing guide add about 30 KB (~7,400 tokens) to the start of every session. Trim `BUNDLES` in
 `setup-skills.sh` if that budget matters more than the coverage.
 
@@ -77,6 +77,37 @@ uses `-xtype d`, and anything walking that tree must too.
 overlapping skills — six cover frontend design alone, and two separate SEO
 systems are installed side by side. Edit it in the heredoc at the bottom of
 the script, not in place; it is regenerated every run.
+
+## Daily drift check
+
+`.github/workflows/skills-update.yml` runs at 04:17 UTC and opens one PR only
+when something changed.
+
+Skills are not vendored, so they are never stale — every session installs them
+fresh. What the workflow catches is everything around them, via
+`scripts/check-skill-drift.sh`:
+
+- the claude-seo version pin, which it bumps when upstream tags a release
+- upstreams that retired into redirect stubs, the `seo-geo-claude-skills`
+  failure mode, where sessions keep installing and silently get nothing
+- new name collisions between bundles, the `seo-audit` failure mode
+- `SKILLS.md` drifting from what actually installs
+
+The drift script's inventory check stops at the `## Account level` heading:
+those skills live at claude.ai, not in the container, so comparing them against
+installed directories reports them missing every time.
+
+## Session-start token cost
+
+About 4,400 tokens, and it does not scale with how big the skills are — only
+with how many there are. Claude Code loads each skill's frontmatter
+(name plus description) so it knows what exists, and loads a body only when
+that skill is actually invoked. Measured here: 17 KB of frontmatter against
+358 KB of SKILL.md bodies and 703 MB of the whole tree.
+
+So vendoring the skills into this repo would not lower the cost — the same
+descriptions would still load, from a different path. The only lever is
+installing fewer skills: trim `BUNDLES`.
 
 ## Deliberately not installed
 
