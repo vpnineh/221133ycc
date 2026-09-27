@@ -25,6 +25,10 @@ BUNDLES=(
   "copywriting|coreyhaines31/marketingskills|"
   "caveman-explore|JuliusBrussee/caveman|"
   "animate|emilkowalski/skills|"
+  # Only the seo-geo arm of aaron-marketing-skills. The bundle also carries 104
+  # ad/email/influencer/launch/narrative/social skills that duplicate
+  # marketingskills, so they are left out.
+  "serp-markup-builder|aaron-he-zhu/aaron-marketing-skills|-s domain-authority-auditor -s offsite-signal-analyzer -s performance-monitor -s rank-tracker -s content-writer -s geo-content-optimizer -s page-play-builder -s serp-markup-builder -s competitor-analysis -s content-gap-analysis -s keyword-research -s serp-analysis -s content-quality-auditor -s on-page-seo-checker -s site-structure-optimizer -s technical-seo-checker"
 )
 
 # Which bundle each skill came from, so list-skills.sh can group the inventory
@@ -77,14 +81,14 @@ for pkg in "@playwright/cli:playwright-cli" "ruflo:ruflo"; do
     npm install -g "${name}@latest" >/dev/null 2>&1 || log "WARN: ${name} failed"
 done
 
-# Routing guidance. With ~140 skills installed, several cover overlapping
+# Routing guidance. With ~157 skills installed, several cover overlapping
 # ground and the description text alone does not separate them. This lands at
 # user scope so it applies to every project in the container, not just this
 # repo. Regenerated each run; the container is ephemeral anyway.
 cat > "${HOME}/.claude/CLAUDE.md" <<'ROUTING'
 # Skill routing
 
-Roughly 140 skills are installed here and several overlap. Pick by the shape of
+Roughly 157 skills are installed here and several overlap. Pick by the shape of
 the task, not by keyword match on the skill name. When two fit, prefer the
 narrower one.
 
@@ -159,12 +163,28 @@ component libraries; `prototype` builds a throwaway to feel an idea out.
 `marketing-seo-audit` (renamed to avoid clobbering claude-seo's `seo-audit`),
 `schema`, `ai-seo`, `programmatic-seo`, `site-architecture`.
 
-Analysing a live URL → claude-seo. Deciding strategy, or no crawling possible
-→ marketingskills.
+**aaron-marketing-skills seo-geo** is a third set: deep prose playbooks with no
+tooling, named without the `seo-` prefix — `keyword-research`, `serp-analysis`,
+`competitor-analysis`, `content-gap-analysis`, `rank-tracker`,
+`performance-monitor`, `technical-seo-checker`, `on-page-seo-checker`,
+`content-quality-auditor`, `domain-authority-auditor`, `offsite-signal-analyzer`,
+`site-structure-optimizer`, `serp-markup-builder`, `geo-content-optimizer`,
+`content-writer`, `page-play-builder`. Each carries scoring rubrics and typed
+checklists, and works from exports or data you paste rather than crawling.
 
-In this environment claude-seo cannot fetch URLs (the SSRF guard refuses the
-loopback egress proxy). Fetch the page with WebFetch and hand the content over,
-or fall back to the advisory skills.
+Which of the three:
+
+- claude-seo when it can crawl the site itself
+- **aaron seo-geo when it cannot** — that is the usual case in this
+  environment, see below — or when the user has GSC/GA4 exports to work from
+- marketingskills for channel strategy above the page level
+
+In this environment claude-seo cannot fetch URLs: its SSRF guard refuses the
+loopback egress proxy. So prefer the aaron seo-geo skills here, or fetch the
+page with WebFetch and hand the content to claude-seo.
+
+These skills' descriptions are bilingual (English plus Chinese trigger
+phrases). That is upstream text, not a language preference.
 
 ## Marketing
 
