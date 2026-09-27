@@ -1,0 +1,192 @@
+# Installed skills
+
+141 skills, provisioned into every session on this repo by the
+SessionStart hooks in `.claude/settings.json`. Regenerate with
+`bash .claude/scripts/list-skills.sh`.
+
+Account-level skills (uploaded at claude.ai, so they reach every chat
+rather than only Claude Code) are listed separately at the end.
+
+## ibelick/ui-skills
+
+- **baseline-ui** — Quickly deslop UI code by fixing spacing, hierarchy, typography, and small layout issues.
+- **create-design-md** — Create or update a DESIGN.md from an existing product repository or public website.
+- **fixing-accessibility** — Audit and fix HTML accessibility issues including ARIA labels, keyboard navigation, focus management, color contrast, and form errors.
+- **fixing-metadata** —  Audit and fix HTML metadata including page titles, meta descriptions, canonical URLs, Open Graph tags, Twitter cards, favicons, JSON-LD structured data, and robots directives.
+- **fixing-motion-performance** — Audit and fix animation performance issues including layout thrashing, compositor properties, scroll-linked motion, and blur effects.
+- **improve-ui** — Audit an existing product surface against its own design evidence, identify verified UI problems, and write self-contained implementation plans for another agent.
+- **ui-skills-root** — Use before UI-related work to select the smallest useful UI Skills context through the ui-skills CLI.
+
+## vercel-labs/agent-skills
+
+- **deploy-to-vercel** — Deploy applications and websites to Vercel.
+- **vercel-cli-with-tokens** — Deploy and manage projects on Vercel using token-based authentication.
+- **vercel-composition-patterns** —  React composition patterns that scale.
+- **vercel-optimize** — Use for Vercel cost and performance optimization on deployed projects, especially Next.js, SvelteKit, Nuxt, and limited Astro apps.
+- **vercel-react-best-practices** — React and Next.js performance optimization guidelines from Vercel Engineering.
+- **vercel-react-native-skills** —  React Native and Expo best practices for building performant mobile apps.
+- **vercel-react-view-transitions** — Guide for implementing smooth, native-feeling animations using React's View Transition API (`<ViewTransition>` component, `addTransitionType`, and CSS view transition pseudo-elements).
+- **web-design-guidelines** — Review UI code for Web Interface Guidelines compliance.
+- **writing-guidelines** — Review docs/prose for Writing Guidelines compliance.
+
+## pbakaus/impeccable
+
+- **impeccable** — Use when the user wants to design, redesign, shape, critique, audit, polish, clarify, distill, harden, optimize, adapt, animate, colorize, extract, or otherwise improve a frontend interface.
+
+## nextlevelbuilder/ui-ux-pro-max-skill
+
+- **banner-design** — Design banners for social media, ads, website heroes, creative assets, and print.
+- **brand** — Brand voice, visual identity, messaging frameworks, asset management, brand consistency.
+- **design** — Comprehensive design skill: brand identity, design tokens, UI styling, logo generation (55 styles, Gemini, Atlas Cloud, or MuAPI AI), corporate identity program (50 deliverables, CIP mockups), HTML pr
+- **design-system** — Token architecture, component specifications, and slide generation.
+- **slides** — Create strategic HTML presentations with Chart.js, design tokens, responsive layouts, copywriting formulas, and contextual slide strategies.
+- **ui-styling** — Create beautiful, accessible user interfaces with shadcn/ui components (built on Radix UI + Tailwind), Tailwind CSS utility-first styling, and canvas-based visual designs.
+- **ui-ux-pro-max** — UI/UX design intelligence for web, mobile, and desktop.
+
+## upstash/context7
+
+- **context7-cli** — Use the ctx7 CLI to fetch library documentation, manage AI coding skills, and configure Context7 MCP.
+- **context7-mcp** — This skill should be used when the user asks about libraries, frameworks, API references, or needs code examples.
+- **find-docs** —  Retrieves up-to-date documentation, API references, and code examples for any developer technology.
+
+## anthropics/skills
+
+- **frontend-design** — Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one.
+
+## coreyhaines31/marketingskills
+
+- **ab-testing** — When the user wants to plan, design, or implement an A/B test or experiment, or build a growth experimentation program.
+- **ad-creative** — When the user wants to generate, iterate, or scale ad creative — headlines, descriptions, primary text, or full ad variations — for any paid advertising platform.
+- **ads** — When the user wants help with paid advertising campaigns on Google Ads, Meta (Facebook/Instagram), LinkedIn, Twitter/X, or other ad platforms.
+- **ai-seo** — When the user wants to optimize content for AI search engines, get cited by LLMs, or appear in AI-generated answers.
+- **analytics** — When the user wants to set up, improve, or audit analytics tracking and measurement.
+- **aso** — When the user wants to audit or optimize an App Store or Google Play listing.
+- **attribution** — When the user wants to figure out which marketing actually drives conversions and revenue, choose or interpret an attribution model, or reconcile conflicting numbers across tools.
+- **churn-prevention** — When the user wants to reduce churn, build cancellation flows, set up save offers, recover failed payments, or implement retention strategies.
+- **co-marketing** — When the user wants to find co-marketing partners, plan joint campaigns, or brainstorm partnership opportunities.
+- **cold-email** — Write B2B cold emails and follow-up sequences that get replies.
+- **community-marketing** — Build and leverage online communities to drive product growth and brand loyalty.
+- **competitor-profiling** — When the user wants to research, profile, or analyze competitors from their URLs.
+- **competitors** — When the user wants to create competitor comparison or alternative pages for SEO and sales enablement.
+- **content-strategy** — When the user wants to plan a content strategy, decide what content to create, or figure out what topics to cover.
+- **copy-editing** — When the user wants to edit, review, or improve existing marketing copy, or refresh outdated content.
+- **copywriting** — When the user wants to write, rewrite, or improve marketing copy for any page — including homepage, landing pages, pricing pages, feature pages, about pages, or product pages.
+- **cro** — When the user wants to optimize, improve, or increase conversions on any marketing page or form — including homepage, landing pages, pricing pages, feature pages, lead capture forms, or contact form
+- **customer-research** — When the user wants to conduct, analyze, or synthesize customer research.
+- **directory-submissions** — When the user wants to submit their product to startup, SaaS, AI, agent, MCP, no-code, or review directories for backlinks, domain rating, and discovery.
+- **emails** — When the user wants to create or optimize an email sequence, drip campaign, automated email flow, or lifecycle email program.
+- **events** — When the user wants to plan, run, sponsor, speak at, or get pipeline from events — webinars, conferences, trade shows, meetups, dinners, workshops, virtual summits, or user conferences.
+- **free-tools** — When the user wants to plan, evaluate, or build a free tool for marketing purposes — lead generation, SEO value, or brand awareness.
+- **image** — When the user wants to create, generate, edit, or optimize images for marketing — blog heroes, social graphics, product mockups, profile banners, listing visuals, or brand assets.
+- **influencer-marketing** — When the user wants to run influencer, creator, or ambassador partnerships to promote their product — finding and vetting partners, structuring deals, briefing creators, disclosure compliance, and m
+- **launch** — When the user wants to plan a product launch, feature announcement, or release strategy.
+- **lead-magnets** — When the user wants to create, plan, or optimize a lead magnet for email capture or lead generation.
+- **marketing-council** — When the user wants multiple expert perspectives on a marketing question — a simulated board of advisors staffed by legendary marketers (Seth Godin, David Ogilvy, Eugene Schwartz, April Dunford, Ror
+- **marketing-ideas** — When the user needs marketing ideas, inspiration, or strategies for their SaaS or software product.
+- **marketing-loops** — When the user wants to set up a recurring, self-running marketing workflow — a repeatable loop an AI agent runs on a cadence (weekly, daily, on a trigger) rather than a one-off task.
+- **marketing-plan** — When the user needs a comprehensive marketing plan for a client, a company they advise, or their own product.
+- **marketing-psychology** — When the user wants to apply psychological principles, mental models, or behavioral science to marketing.
+- **marketing-seo-audit** — When the user wants to audit, review, or diagnose SEO issues on their site.
+- **offers** — When the user wants to design, construct, or improve an offer — the thing they actually sell — including value framing, bonus stacking, guarantee design, scarcity/urgency, naming, and payment stru
+- **onboarding** — When the user wants to optimize post-signup onboarding, user activation, first-run experience, or time-to-value.
+- **paywalls** — When the user wants to create or optimize in-app paywalls, upgrade screens, upsell modals, or feature gates.
+- **popups** — When the user wants to create or optimize popups, modals, overlays, slide-ins, or banners for conversion purposes.
+- **pricing** — When the user wants help with pricing decisions, packaging, or monetization strategy.
+- **product-marketing** — When the user wants to create or update their product marketing context document.
+- **programmatic-seo** — When the user wants to create SEO-driven pages at scale using templates and data.
+- **prospecting** — When the user wants to find, qualify, and build a list of prospects to reach out to — across B2B SaaS, general B2B, or local small businesses.
+- **public-relations** — When the user wants help with public relations, earned media, press coverage, journalist outreach, or media strategy (not pull requests).
+- **referrals** — When the user wants to create, optimize, or analyze a referral program, affiliate program, or word-of-mouth strategy.
+- **revops** — When the user wants help with revenue operations, lead lifecycle management, or marketing-to-sales handoff processes.
+- **sales-enablement** — When the user wants to create sales collateral, pitch decks, one-pagers, objection handling docs, or demo scripts.
+- **schema** — When the user wants to add, fix, or optimize schema markup and structured data on their site.
+- **signup** — When the user wants to optimize signup, registration, account creation, or trial activation flows.
+- **site-architecture** — When the user wants to plan, map, or restructure their website's page hierarchy, navigation, URL structure, or internal linking.
+- **sms** — When the user wants to plan, build, or optimize SMS or MMS marketing — including welcome flows, abandoned cart texts, post-purchase, win-back, promotional sends, or transactional/auth SMS.
+- **social** — When the user wants help creating, scheduling, or optimizing social media content for LinkedIn, Twitter/X, Instagram, TikTok, Facebook, or other platforms, or wants to do social listening and engageme
+- **video** — When the user wants to create, generate, or produce video content using AI tools or programmatic frameworks.
+
+## JuliusBrussee/caveman
+
+- **cavecrew** —  When to delegate to `cavecrew-investigator` (locate code), `cavecrew-builder` (1-2 file edit) or `cavecrew-reviewer` (diff review) instead of working inline or using `Explore`.
+- **caveman-commit** —  Write a Conventional Commits message compressed to intent only.
+- **caveman-compress** —  Compress a memory file such as CLAUDE.md or a todo list into caveman format to save input tokens, keeping a readable backup.
+- **caveman-discover** —  Find and label every LLM workflow in the repository so Caveman Cloud groups spend by workflow instead of one bucket.
+- **caveman-evidence-review** —  Read-only review of Caveman Cloud evidence: cost, Cave Score, workflows, traces, latency, errors, routing, savings.
+- **caveman-explore** — Read-only repository explorer for cold-start orientation, broad cross-file localization, or when a direct search failed.
+- **caveman-help** —  Quick-reference card for caveman modes, skills and commands.
+- **caveman-learn** — Act on a Caveman learn report - review the ranked token sinks, apply cost-lowering fixes with per-edit consent, and report what those fixes returned.
+- **caveman-manage** —  Inspect Caveman Cloud's experiment lifecycle and block unsafe execution.
+- **caveman-optimize** —  Turn a Caveman optimization observation into an operator-chosen candidate with a paired baseline evaluation.
+- **caveman-setup** —  Wire a repository through the Caveman Cloud gateway so every LLM request is measured, with no behavior change.
+- **caveman-stats** —  Show recorded output and cache-read token usage and mode attribution for the current Claude Code session, or locate the host's native usage report.
+- **investigate-first** — Diagnose ambiguous failures before editing.
+- **lean-build** — Build feature work with high overbuilding risk.
+- **migration** — Implement reversible compatibility-safe transitions.
+- **safe-refactor** — Restructure code while preserving behavior.
+- **surgical-patch** — Fix bugs and small behavior changes at the narrowest responsible layer.
+- **verify-and-stop** — Prove existing work meets acceptance conditions without expanding scope.
+
+## emilkowalski/skills
+
+- **animate** — Build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and dura
+- **animate-expo** — Build animations in React Native and Expo, making the decisions in the order that determines whether they feel right — should it animate, which thread it runs on, which properties, spring or timing,
+- **animation-vocabulary** — Reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in; "the iOS rubber-band scroll" → Rub
+- **apple-design** — Apple's approach to interface design and fluid, physical motion, translated for the web.
+- **ask-sonner** — Guide to Sonner, the React toast library — install and wire up the Toaster, pick the right toast() call, promise and loading toasts, updating, dismissing and persisting toasts, styling, theming and
+- **emil-design-eng** — This skill encodes Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great.
+- **find-animation-opportunities** — Search a codebase or UI for places that don't animate but should, and reject everything that shouldn't.
+- **improve-animations** — Survey a codebase's animation and motion code as a senior motion advisor, then produce a prioritized audit and self-contained implementation plans for other agents (or cheaper models) to execute.
+- **mobile-native** — Make a web app feel native on a phone — the small CSS and meta-tag fixes that separate "a website in a browser" from something that feels installed.
+- **pick-ui-library** — Pick the right library for a given frontend task from a curated, opinionated list — numbers, OTP inputs, charts, command menus, virtualization, drag and drop, toasts, state, styling, and more.
+- **prototype** — Build multiple genuinely different versions of a UI piece you describe, rendered behind a visual picker so you can flip through them live and promote the one that feels right.
+- **review-animations** — Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy.
+- **write-swift** — How to write modern Swift well — modeling with value types, Swift 6 data-race safety and approachable concurrency (@concurrent, main-actor-by-default, actors, task groups), protocols and generics (s
+
+## Other
+
+claude-seo (its own hook), graphify, and anything installed by hand.
+
+- **graphify** — Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first
+- **seo** — Comprehensive SEO analysis for any website or business type.
+- **seo-ahrefs** — Ahrefs API analyst (extension).
+- **seo-audit** — Full website SEO audit with parallel subagent delegation.
+- **seo-backlinks** — Backlink profile analysis: referring domains, anchor text distribution, toxic link detection, competitor gap analysis.
+- **seo-bing** — Bing Webmaster Tools + IndexNow extension.
+- **seo-cluster** —  SERP-based semantic topic clustering for content architecture planning.
+- **seo-competitor-pages** —  Generate SEO-optimized competitor comparison and alternatives pages.
+- **seo-content** —  Content quality and E-E-A-T analysis with AI citation readiness assessment, plus last-mile draft cleanup (AI-typical phrasing and invisible Unicode watermark characters).
+- **seo-content-brief** —  Generate competitive SEO content briefs with per-section word counts, competitor scoring, keyword density guidance, and page-type templates.
+- **seo-dataforseo** —  Live SEO data via DataForSEO MCP server: SERP analysis, keyword research (volume, difficulty, intent, trends), backlink profiles, on-page analysis, competitor and content analysis, business listings,
+- **seo-drift** —  SEO drift monitoring: capture baselines of SEO-critical elements, detect changes, and track regressions over time.
+- **seo-ecommerce** —  E-commerce SEO analysis: Google Shopping visibility, Amazon marketplace intelligence, product schema validation, competitor pricing analysis, and marketplace keyword gaps.
+- **seo-firecrawl** —  Full-site crawling, scraping, and site mapping via Firecrawl MCP.
+- **seo-flow** —  FLOW framework integration: evidence-led SEO using the Find → Leverage → Optimize → Win loop.
+- **seo-geo** —  Optimize content for AI Overviews (formerly SGE), ChatGPT web search, Perplexity, and other AI-powered search experiences.
+- **seo-google** —  Google SEO APIs: Search Console (Search Analytics, URL Inspection, Sitemaps), PageSpeed Insights v5, CrUX field data with 25-week history, Indexing API v3, and GA4 organic traffic.
+- **seo-hreflang** —  Hreflang and international SEO audit, validation, and generation.
+- **seo-image-gen** — AI image generation for SEO assets: OG/social preview images, blog hero images, schema images, product photography, infographics.
+- **seo-images** —  Image optimization analysis for SEO and performance.
+- **seo-local** —  Local SEO analysis covering Google Business Profile optimization, NAP consistency, citation health, review signals, local schema markup, location page quality, multi-location SEO, and industry-specif
+- **seo-maps** —  Maps intelligence for local SEO: geo-grid rank tracking, GBP profile auditing via API, review intelligence across Google/Tripadvisor/Trustpilot, cross-platform NAP verification, competitor radius map
+- **seo-page** —  Deep single-page SEO analysis covering on-page elements, content quality, technical meta tags, schema, images, and performance.
+- **seo-plan** —  Strategic SEO planning for new or existing websites.
+- **seo-profound** — Profound LLM citation tracker (extension).
+- **seo-programmatic** —  Programmatic SEO planning and analysis for pages generated at scale from data sources.
+- **seo-schema** —  Detect, validate, and generate Schema.org structured data.
+- **seo-seranking** — SE Ranking AI visibility analyst (extension).
+- **seo-sitemap** —  Analyze existing XML sitemaps or generate new ones with industry templates.
+- **seo-sxo** —  Search Experience Optimization: reads Google SERPs backwards to detect page-type mismatches, derives user stories from search intent signals, and scores pages from multiple persona perspectives.
+- **seo-technical** —  Technical SEO audit across 9 categories: crawlability, indexability, security, URL structure, mobile, Core Web Vitals, structured data, JavaScript rendering, and IndexNow protocol.
+- **seo-unlighthouse** — Multi-page Lighthouse audit via the MIT-licensed Unlighthouse CLI.
+
+## Account level (every chat, not just Claude Code)
+
+Uploaded as skills at claude.ai, so they load in plain chats too. Not managed
+by these hooks.
+
+- **typesafe-ai** — building with TypeSafe's System One models
+- **graphify** — codebase knowledge graph
+- **karpathy-guidelines** — behavioural guardrails against common LLM coding mistakes
+- **caveman** — ultra-compressed output mode
+- **caveman-review** — one-line-per-finding code review

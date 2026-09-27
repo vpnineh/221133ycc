@@ -21,13 +21,14 @@ Both are idempotent. Measured: a warm session is ~7ms, a cold one 2m6s.
 | `anthropics/skills` (`frontend-design`) | 1 |
 | `coreyhaines31/marketingskills` | 50 |
 | `JuliusBrussee/caveman` | 17 |
+| `emilkowalski/skills` | 13 |
 | `AgriciDaniel/claude-seo` | 31 |
 | `Graphify-Labs/graphify` (PyPI `graphifyy`) | 1 |
 
 Global CLIs: `@playwright/cli`, `ruflo`, `graphify`.
 
-129 skills. Their descriptions plus the routing guide add about 21 KB
-(~5,200 tokens) to the start of every session. Trim `BUNDLES` in
+141 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
+routing guide add about 24 KB (~6,000 tokens) to the start of every session. Trim `BUNDLES` in
 `setup-skills.sh` if that budget matters more than the coverage.
 
 ## Two collisions the scripts resolve
@@ -58,6 +59,16 @@ startup, before SessionStart hooks run. `Bash|Grep` gets a nudge to run
 first raw source read of a session until one query has run, then only nudges.
 Set `GRAPHIFY_HOOK_STRICT=0` to keep only the nudge. Both hooks are silent
 no-ops when graphify is missing or the project has no graph.
+
+## Inventory
+
+`scripts/list-skills.sh` regenerates `SKILLS.md`: every installed skill grouped
+by the bundle it came from, with its own one-line summary. It reads
+`~/.claude/skills-provenance.tsv`, which the bundle loop records as it installs,
+so the grouping is observed rather than hardcoded.
+
+`npx skills add` installs skills as symlinks, not directories — the generator
+uses `-xtype d`, and anything walking that tree must too.
 
 ## Routing
 

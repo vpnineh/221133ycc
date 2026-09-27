@@ -24,7 +24,13 @@ BUNDLES=(
   "frontend-design|anthropics/skills|--skill frontend-design"
   "copywriting|coreyhaines31/marketingskills|"
   "caveman-explore|JuliusBrussee/caveman|"
+  "animate|emilkowalski/skills|"
 )
+
+# Which bundle each skill came from, so list-skills.sh can group the inventory
+# by source. Recorded as bundles install; a warm session installs nothing and
+# keeps the file it already has.
+PROV="${HOME}/.claude/skills-provenance.tsv"
 
 for spec in "${BUNDLES[@]}"; do
     IFS='|' read -r marker target extra <<< "${spec}"
@@ -32,9 +38,12 @@ for spec in "${BUNDLES[@]}"; do
         continue
     fi
     log "installing ${target}..."
+    before=$(ls "${SKILLS_DIR}" 2>/dev/null | sort)
     # shellcheck disable=SC2086
     npx -y skills add "${target}" ${extra} -g >/dev/null 2>&1 || \
         log "WARN: ${target} did not install cleanly"
+    comm -13 <(echo "${before}") <(ls "${SKILLS_DIR}" 2>/dev/null | sort) | \
+        while read -r s; do [ -n "${s}" ] && printf '%s\t%s\n' "${s}" "${target}"; done >> "${PROV}"
 done
 
 # marketingskills ships a skill literally named seo-audit, which lands on the
@@ -48,6 +57,7 @@ if [ -f "${MK}/SKILL.md" ] && ! grep -q "subagent delegation" "${MK}/SKILL.md"; 
     mv "${MK}" "${SKILLS_DIR}/marketing-seo-audit"
     sed -i '0,/^name: seo-audit$/s//name: marketing-seo-audit/' \
         "${SKILLS_DIR}/marketing-seo-audit/SKILL.md"
+    sed -i 's/^seo-audit\t/marketing-seo-audit\t/' "${PROV}" 2>/dev/null || true
 fi
 
 # caveman's core `caveman` and `caveman-review` are already uploaded as
@@ -55,6 +65,7 @@ fi
 # sessions. Drop the local copies so the same trigger does not fire twice.
 for dup in caveman caveman-review; do
     rm -rf "${SKILLS_DIR:?}/${dup}"
+    sed -i "/^${dup}\t/d" "${PROV}" 2>/dev/null || true
 done
 
 # Global CLIs. playwright-cli ships its own skill; ruflo is an agent
@@ -66,14 +77,14 @@ for pkg in "@playwright/cli:playwright-cli" "ruflo:ruflo"; do
     npm install -g "${name}@latest" >/dev/null 2>&1 || log "WARN: ${name} failed"
 done
 
-# Routing guidance. With ~110 skills installed, several cover overlapping
+# Routing guidance. With ~140 skills installed, several cover overlapping
 # ground and the description text alone does not separate them. This lands at
 # user scope so it applies to every project in the container, not just this
 # repo. Regenerated each run; the container is ephemeral anyway.
 cat > "${HOME}/.claude/CLAUDE.md" <<'ROUTING'
 # Skill routing
 
-Roughly 110 skills are installed here and several overlap. Pick by the shape of
+Roughly 140 skills are installed here and several overlap. Pick by the shape of
 the task, not by keyword match on the skill name. When two fit, prefer the
 narrower one.
 
@@ -90,11 +101,45 @@ narrower one.
 | Implement with shadcn/ui + Tailwind | `ui-styling` |
 | Review against the Web Interface Guidelines checklist | `web-design-guidelines` |
 | Accessibility: ARIA, keyboard, focus, contrast | `fixing-accessibility` |
-| Janky animation, layout thrashing, scroll-linked motion | `fixing-motion-performance` |
 | Titles, meta descriptions, Open Graph, canonical, JSON-LD | `fixing-metadata` |
 
 `web-pro` is the widest. Reach for it when building; reach for the specific
-audit skills when reviewing.
+audit skills when reviewing. Anything about motion has its own section below.
+
+## Animation and motion
+
+The emilkowalski set owns motion decisions; reach for it before writing any
+transition, not after the result feels wrong.
+
+| Task | Skill |
+| --- | --- |
+| Build an animation, transition or micro-interaction (web) | `animate` |
+| Same in React Native / Expo, with Reanimated and gestures | `animate-expo` |
+| Critique motion in a diff or one component | `review-animations` |
+| Audit a whole codebase's motion, produce a plan | `improve-animations` |
+| Find places that should animate but don't | `find-animation-opportunities` |
+| Janky animation: layout thrashing, compositor, scroll-linked | `fixing-motion-performance` |
+| React View Transition API specifically | `vercel-react-view-transitions` |
+| Name an effect the user described vaguely | `animation-vocabulary` |
+| Spring physics, gestures, sheets, momentum, Apple-style feel | `apple-design` |
+| Make a web app feel native on a phone (CSS and meta fixes) | `mobile-native` |
+| UI polish and component-detail judgement | `emil-design-eng` |
+
+Three of these look alike, so split them by direction:
+`animate` writes code, `review-animations` judges what exists in one place,
+`improve-animations` plans across a codebase and never edits.
+
+`fixing-motion-performance` is a performance tool, not a design one — use it
+when motion stutters, and `animate` or `review-animations` when it works but
+feels wrong.
+
+`apple-design` overlaps `frontend-design` on aesthetics; prefer it when the
+brief is gesture-driven, physical or spring-based, and `frontend-design` for
+visual direction and typography.
+
+Two are narrow and unambiguous: `ask-sonner` for the Sonner toast library,
+`write-swift` for Swift and Swift concurrency. `pick-ui-library` compares
+component libraries; `prototype` builds a throwaway to feel an idea out.
 
 ## React and Next.js
 
