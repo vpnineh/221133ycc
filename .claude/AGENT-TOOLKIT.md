@@ -22,13 +22,14 @@ Both are idempotent. Measured: a warm session is ~7ms, a cold one 2m6s.
 | `coreyhaines31/marketingskills` | 50 |
 | `JuliusBrussee/caveman` | 17 |
 | `emilkowalski/skills` | 13 |
+| `aaron-he-zhu/aaron-marketing-skills` (seo-geo arm only) | 16 |
 | `AgriciDaniel/claude-seo` | 31 |
 | `Graphify-Labs/graphify` (PyPI `graphifyy`) | 1 |
 
 Global CLIs: `@playwright/cli`, `ruflo`, `graphify`.
 
-141 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
-routing guide add about 24 KB (~6,000 tokens) to the start of every session. Trim `BUNDLES` in
+157 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
+routing guide add about 30 KB (~7,400 tokens) to the start of every session. Trim `BUNDLES` in
 `setup-skills.sh` if that budget matters more than the coverage.
 
 ## Two collisions the scripts resolve
@@ -79,10 +80,23 @@ the script, not in place; it is regenerated every run.
 
 ## Deliberately not installed
 
-**`seoskillsai/seo-skills-ai`** — 24 of its skill names collide exactly with
-claude-seo's (`seo-audit`, `seo-schema`, `seo-technical`, `seo-geo`, …).
-Different authors, same names, different content. Pick one; this repo picked
-claude-seo.
+**`seoskillsai/seo-skills-ai`** — 24 skill names collide exactly with
+claude-seo's, and on every shared skill its SKILL.md is far thinner:
+`seo-technical` 1.6 KB vs 17.3 KB, `seo-geo` 1.1 KB vs 19.4 KB, `seo-local`
+1.1 KB vs 17.2 KB. Same repo layout as claude-seo (install.sh, agents/,
+extensions/, hooks/, schema/), so it reads as a lighter reimplementation.
+Nothing to gain by swapping.
+
+**`aaron-he-zhu/seo-geo-claude-skills`** — retired by its author. All 20 of its
+SKILL.md files are redirect stubs ("this repo is now a signpost") pointing at
+`aaron-he-zhu/aaron-marketing-skills`. Installing it would add 20 stubs. The
+successor's seo-geo arm is installed instead.
+
+**The other 104 skills in `aaron-marketing-skills`** — ad, email, influencer,
+launch, narrative and social arms. Substantive, but they cover the same ground
+as the 50 marketingskills already installed, and taking them would roughly
+double the session-start cost. Add individual ones with
+`npx skills add aaron-he-zhu/aaron-marketing-skills -s <name> -g`.
 
 **`podo/design-agent-skills`** — a catalogue of 151 skills. From its README:
 "Skills install on demand — the catalogue is a lightweight index, not a bulk

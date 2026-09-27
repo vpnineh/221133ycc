@@ -1,6 +1,6 @@
 # Installed skills
 
-141 skills, provisioned into every session on this repo by the
+157 skills, provisioned into every session on this repo by the
 SessionStart hooks in `.claude/settings.json`. Regenerate with
 `bash .claude/scripts/list-skills.sh`.
 
@@ -142,6 +142,25 @@ rather than only Claude Code) are listed separately at the end.
 - **prototype** — Build multiple genuinely different versions of a UI piece you describe, rendered behind a visual picker so you can flip through them live and promote the one that feels right.
 - **review-animations** — Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy.
 - **write-swift** — How to write modern Swift well — modeling with value types, Swift 6 data-race safety and approachable concurrency (@concurrent, main-actor-by-default, actors, task groups), protocols and generics (s
+
+## aaron-he-zhu/aaron-marketing-skills
+
+- **competitor-analysis** — 'Use when the user asks to "analyze competitors" or "竞品分析"; benchmarks competitor keywords, content, backlinks, AI citations, and traffic share into strengths, weaknesses, and an action plan.
+- **content-gap-analysis** — 'Use when the user asks to "find content gaps", "竞品写了什么", or "还应该写什么"; builds a competitor-relative coverage map of missing topics, keyword gaps, and editorial-calendar opportu
+- **content-quality-auditor** — 'Use when auditing content quality, E-E-A-T, or publish readiness; runs a typed 80-item CORE-EEAT profile with evidence coverage, veto checks, and a fix plan.
+- **content-writer** — 'Use when the user asks to "write SEO content", "draft a blog post / landing page", "update outdated content", or "fix traffic/ranking decay"; two modes — new drafts pages with keywords, headers, sn
+- **domain-authority-auditor** — 'Use when auditing domain authority, trust, or citation credibility; runs a peer-relative 40-item CITE profile with evidence coverage and verified manipulation/penalty veto checks.
+- **geo-content-optimizer** — 'Use when the user asks to "optimize for AI citations"; improves citation readiness for ChatGPT, Perplexity, AI Overviews, Gemini, and Claude.
+- **keyword-research** — 'Use when the user asks to "find keywords", "挖词", or "搜什么词"; prioritizes search volume, keyword difficulty, intent, and topic clusters from provided or connected data.
+- **offsite-signal-analyzer** — 'Use when the user asks to "analyze backlinks", "analyze my off-site signals", or "track AI traffic / ChatGPT / Perplexity referrals"; profiles referring domains, anchor-text mix, toxic links, and dis
+- **on-page-seo-checker** — 'Use when the user asks to "audit on-page SEO" or "diagnose why a single page dropped"; scores titles, meta, header structure, keyword placement, links, and images with prioritized fixes.
+- **page-play-builder** — 'Use when the user asks to "build programmatic SEO pages", "generate pages at scale", "rank on a high-authority third-party site", "borrow domain authority", "build a vs / alternative page", "do local
+- **performance-monitor** — 'Use when the user asks to "generate an SEO report", "出月报", "set SEO alerts", or "排名掉了提醒我"; two modes — report builds multi-metric traffic/ranking/authority/content dashboards, a
+- **rank-tracker** — 'Use when the user asks to "track rankings" or "查排名"; measures keyword and SERP-position deltas over time from provided exports or connected tools, including AI-response checks.
+- **serp-analysis** — 'Use when the user asks to "analyze the SERP" or "SERP分析"; maps SERP features, layout, ranking factors, search intent, AI Overviews, and snippet opportunities for a query.
+- **serp-markup-builder** — 'Use when the user asks to "optimize meta tags", "write title tags / meta descriptions", "add Open Graph or Twitter cards", or "generate schema / JSON-LD" for FAQ, HowTo, Article, Product, or LocalBus
+- **site-structure-optimizer** — 'Use when the user asks to "plan my site structure", "design the page hierarchy / navigation / URL taxonomy", "fix internal linking", or "find orphan pages"; runs two modes — architecture (hierarchy
+- **technical-seo-checker** — 'Use when the user asks to "check technical SEO"; audits crawlability, indexing, Core Web Vitals, robots.txt, sitemaps, canonicals, redirects, and migrations.
 
 ## Other
 
