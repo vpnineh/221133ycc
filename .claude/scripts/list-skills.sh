@@ -10,6 +10,10 @@
 set -euo pipefail
 
 SKILLS_DIR="${HOME}/.claude/skills"
+# Claude Code ships its own skills into this directory. No script installs
+# them, so CI — which starts from an empty HOME — would report them missing
+# every run. Keep them out of the inventory.
+BUILTIN='^(session-start-hook)$'
 PROV="${HOME}/.claude/skills-provenance.tsv"
 OUT="${1:-${CLAUDE_PROJECT_DIR:-.}/.claude/SKILLS.md}"
 
@@ -29,7 +33,7 @@ summarize() {
     ' "$1" | sed 's/"$//' | cut -c1-200 | sed 's/\([.!?]\) [A-Z].*/\1/' | sed 's/[[:space:]]*$//'
 }
 
-count=$(find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 ! -name synced -xtype d | wc -l)
+count=$(find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 ! -name synced -xtype d -printf '%f\n' | grep -Evc "${BUILTIN}")
 
 {
     echo "# Installed skills"
@@ -59,7 +63,7 @@ count=$(find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 ! -name synced -xtype d | w
 
     # Anything without a provenance row.
     others=$(comm -23 \
-        <(find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 ! -name synced -xtype d -printf '%f\n' | sort -u) \
+        <(find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 ! -name synced -xtype d -printf '%f\n' | grep -Ev "${BUILTIN}" | sort -u) \
         <(awk -F'\t' '{print $1}' "${PROV}" 2>/dev/null | sort -u))
     if [ -n "${others}" ]; then
         printf '## Other\n\n'
