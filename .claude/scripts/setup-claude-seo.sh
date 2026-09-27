@@ -7,15 +7,31 @@
 set -euo pipefail
 
 SKILL_DIR="${HOME}/.claude/skills/seo"
-REPO_TAG="${CLAUDE_SEO_TAG:-v2.3.1}"
+REPO_TAG="${CLAUDE_SEO_TAG:-v2.4.0}"
 PW_DIR="${PLAYWRIGHT_BROWSERS_PATH:-/opt/pw-browsers}"
 
 log() { echo "[claude-seo] $*"; }
 
+# Healthy is not enough to skip: a resumed session keeps its container, so
+# without the version check it would keep the old release forever after the
+# pin is bumped. Skip only when the installed version is the pinned one.
+installed_ver=$(grep -oP '"version":\s*"\K[^"]+' "${SKILL_DIR}/runtime-plugin.json" 2>/dev/null || true)
+# Also require that seo-audit is still ours. Another bundle ships a skill of the
+# same name onto the same path; if it has overwritten ours, `doctor` still says
+# healthy — it checks the runtime, not the skill files — and we would never put
+# the orchestrator back.
+ours_audit=0
+grep -qE '^[[:space:]]+author:[[:space:]]*"?AgriciDaniel' \
+    "${HOME}/.claude/skills/seo-audit/SKILL.md" 2>/dev/null && ours_audit=1
 if [ -x "${SKILL_DIR}/scripts/claude-seo" ] && \
+   [ "${installed_ver}" = "${REPO_TAG#v}" ] && \
+   [ "${ours_audit}" = "1" ] && \
    "${SKILL_DIR}/scripts/claude-seo" doctor 2>/dev/null | grep -q "Chromium: ready"; then
-    log "already installed and healthy"
+    log "${REPO_TAG} already installed and healthy"
     exit 0
+fi
+if [ -n "${installed_ver}" ] && [ "${installed_ver}" != "${REPO_TAG#v}" ]; then
+    log "upgrading ${installed_ver} -> ${REPO_TAG#v}"
 fi
 
 log "installing ${REPO_TAG}..."
@@ -38,14 +54,24 @@ fi
 # expected name from playwright itself rather than hardcoding it.
 log "wiring up pre-installed Chromium..."
 VENV_PY="${SKILL_DIR}/.venv/bin/python"
+# Match the build number by name rather than by path depth: indexing a fixed
+# path component only worked while PW_DIR was exactly /opt/pw-browsers, and
+# returned the directory name ("pw") anywhere else.
 BUILD=$("${VENV_PY}" -c "
+import re
 from playwright.sync_api import sync_playwright
-import pathlib
 with sync_playwright() as p:
-    print(pathlib.Path(p.chromium.executable_path).parts[3].split('-')[-1])
+    m = re.search(r'/chromium(?:_headless_shell)?-(\d+)/', p.chromium.executable_path)
+    print(m.group(1) if m else '')
 " 2>/dev/null) || BUILD=""
 
-HAVE=$(ls -d "${PW_DIR}"/chromium-* 2>/dev/null | head -1 | sed 's/.*-//')
+# No pre-installed browser at all (a CI runner, a bare image) is a normal case,
+# not an error. Under pipefail an unmatched `ls` exits 2 and kills the script,
+# so look for the directory first instead of piping ls.
+HAVE=""
+for d in "${PW_DIR}"/chromium-*; do
+    [ -d "${d}" ] && HAVE="${d##*-}" && break
+done
 
 if [ -n "${BUILD}" ] && [ -n "${HAVE}" ]; then
     # Chrome-for-testing layout (what new Playwright expects) mapped onto the
