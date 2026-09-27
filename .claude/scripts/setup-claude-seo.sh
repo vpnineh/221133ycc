@@ -7,7 +7,7 @@
 set -euo pipefail
 
 SKILL_DIR="${HOME}/.claude/skills/seo"
-REPO_TAG="${CLAUDE_SEO_TAG:-v2.3.1}"
+REPO_TAG="${CLAUDE_SEO_TAG:-v2.4.0}"
 PW_DIR="${PLAYWRIGHT_BROWSERS_PATH:-/opt/pw-browsers}"
 
 log() { echo "[claude-seo] $*"; }
