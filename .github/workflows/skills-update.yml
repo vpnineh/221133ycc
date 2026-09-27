@@ -1,0 +1,135 @@
+name: Skills drift check
+
+# Skills are not vendored — every session installs them fresh from upstream, so
+# the skills themselves never go stale. This catches what does: the claude-seo
+# version pin, upstreams that retired into redirect stubs, new name collisions
+# between bundles, and SKILLS.md drifting from what actually installs.
+#
+# Runs daily, opens one PR when something changed, and does nothing otherwise.
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: skills-update
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install the skill bundles
+        env:
+          CLAUDE_PROJECT_DIR: ${{ github.workspace }}
+        run: bash .claude/scripts/setup-skills.sh
+
+      # claude-seo's own installer. Its Chromium step needs the pre-installed
+      # browser this CI runner does not have, and the setup script tolerates
+      # that; the skill files, which is all the inventory needs, still land.
+      - name: Install claude-seo
+        env:
+          CLAUDE_PROJECT_DIR: ${{ github.workspace }}
+        continue-on-error: true
+        run: bash .claude/scripts/setup-claude-seo.sh
+
+      - name: Bump the claude-seo pin if upstream released
+        id: pin
+        run: |
+          current=$(grep -oP 'REPO_TAG="\$\{CLAUDE_SEO_TAG:-\K[^}]+' .claude/scripts/setup-claude-seo.sh)
+          latest=$(curl -fsSL --max-time 30 \
+            https://api.github.com/repos/AgriciDaniel/claude-seo/releases/latest \
+            | grep -oP '"tag_name":\s*"\K[^"]+' | head -1)
+          echo "current=${current}" >> "$GITHUB_OUTPUT"
+          echo "latest=${latest}" >> "$GITHUB_OUTPUT"
+          if [ -n "${latest}" ] && [ "${latest}" != "${current}" ]; then
+            sed -i "s|CLAUDE_SEO_TAG:-${current}|CLAUDE_SEO_TAG:-${latest}|" \
+              .claude/scripts/setup-claude-seo.sh
+            echo "bumped=true" >> "$GITHUB_OUTPUT"
+            echo "claude-seo ${current} -> ${latest}"
+          else
+            echo "bumped=false" >> "$GITHUB_OUTPUT"
+            echo "claude-seo ${current} is current"
+          fi
+
+      - name: Regenerate the inventory
+        env:
+          CLAUDE_PROJECT_DIR: ${{ github.workspace }}
+        run: bash .claude/scripts/list-skills.sh
+
+      # The report is the useful output whether or not it finds anything, so a
+      # non-zero exit here is a finding, not a build failure.
+      - name: Check for drift
+        id: drift
+        env:
+          CLAUDE_PROJECT_DIR: ${{ github.workspace }}
+        run: |
+          set +e -o pipefail
+          bash .claude/scripts/check-skill-drift.sh | tee drift-report.txt
+          echo "issues=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+          set -e +o pipefail
+          {
+            echo '## Skills drift'
+            echo '```'
+            cat drift-report.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open a PR if anything changed
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PIN_BUMPED: ${{ steps.pin.outputs.bumped }}
+          PIN_FROM: ${{ steps.pin.outputs.current }}
+          PIN_TO: ${{ steps.pin.outputs.latest }}
+        run: |
+          git add -A .claude
+          if git diff --cached --quiet; then
+            echo "Nothing changed; no PR."
+            exit 0
+          fi
+
+          branch="skills/auto-update-$(date -u +%Y%m%d)"
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "${branch}"
+
+          title="Skills: daily update"
+          [ "${PIN_BUMPED}" = "true" ] && title="Skills: claude-seo ${PIN_FROM} -> ${PIN_TO}"
+
+          {
+            echo "Opened by the daily \`skills-update\` workflow."
+            echo
+            if [ "${PIN_BUMPED}" = "true" ]; then
+              echo "Bumped the claude-seo pin from \`${PIN_FROM}\` to \`${PIN_TO}\`."
+              echo
+            fi
+            echo "Drift report from this run:"
+            echo
+            echo '```'
+            cat drift-report.txt
+            echo '```'
+            echo
+            echo "Review the SKILLS.md diff before merging — a skill disappearing"
+            echo "from it usually means an upstream renamed or retired something."
+          } > pr-body.md
+
+          git commit -q -m "${title}" \
+            -m "Automated by .github/workflows/skills-update.yml. See the PR body for this run's drift report."
+          git push -q -u origin "${branch}"
+          gh pr create --head "${branch}" --title "${title}" --body-file pr-body.md

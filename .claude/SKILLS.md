@@ -1,6 +1,6 @@
 # Installed skills
 
-157 skills, provisioned into every session on this repo by the
+158 skills, provisioned into every session on this repo by the
 SessionStart hooks in `.claude/settings.json`. Regenerate with
 `bash .claude/scripts/list-skills.sh`.
 
@@ -198,6 +198,7 @@ claude-seo (its own hook), graphify, and anything installed by hand.
 - **seo-sxo** —  Search Experience Optimization: reads Google SERPs backwards to detect page-type mismatches, derives user stories from search intent signals, and scores pages from multiple persona perspectives.
 - **seo-technical** —  Technical SEO audit across 9 categories: crawlability, indexability, security, URL structure, mobile, Core Web Vitals, structured data, JavaScript rendering, and IndexNow protocol.
 - **seo-unlighthouse** — Multi-page Lighthouse audit via the MIT-licensed Unlighthouse CLI.
+- **session-start-hook** — Creating and developing startup hooks for Claude Code on the web.
 
 ## Account level (every chat, not just Claude Code)
 
