@@ -16,6 +16,10 @@
 set -uo pipefail
 
 SKILLS_DIR="${HOME}/.claude/skills"
+# Claude Code ships its own skills into this directory. No script installs
+# them, so CI — which starts from an empty HOME — would report them missing
+# every run. Keep them out of the inventory.
+BUILTIN='^(session-start-hook)$'
 REPO_DIR="${CLAUDE_PROJECT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
 INVENTORY="${REPO_DIR}/.claude/SKILLS.md"
 issues=0
@@ -24,12 +28,17 @@ note() { printf '  %s\n' "$*"; }
 section() { printf '\n== %s ==\n' "$*"; }
 
 installed() {
-    find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 ! -name synced -xtype d -printf '%f\n' | sort -u
+    find "${SKILLS_DIR}" -maxdepth 1 -mindepth 1 ! -name synced -xtype d -printf '%f\n' | grep -Ev "${BUILTIN}" | sort -u
 }
 
 section "Pinned versions"
 pin=$(grep -oP 'REPO_TAG="\$\{CLAUDE_SEO_TAG:-\K[^}]+' "${REPO_DIR}/.claude/scripts/setup-claude-seo.sh" 2>/dev/null)
-latest=$(curl -fsSL --max-time 30 \
+# Unauthenticated API calls are rate-limited per IP, and CI runners share
+# addresses, so use a token when one is in the environment.
+auth=()
+[ -n "${GH_TOKEN:-${GITHUB_TOKEN:-}}" ] && \
+    auth=(-H "Authorization: Bearer ${GH_TOKEN:-${GITHUB_TOKEN}}")
+latest=$(curl -fsSL --max-time 30 "${auth[@]+"${auth[@]}"}" \
     https://api.github.com/repos/AgriciDaniel/claude-seo/releases/latest 2>/dev/null \
     | grep -oP '"tag_name":\s*"\K[^"]+' | head -1)
 if [ -z "${latest}" ]; then

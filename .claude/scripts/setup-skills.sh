@@ -12,6 +12,11 @@ set -euo pipefail
 
 SKILLS_DIR="${HOME}/.claude/skills"
 
+# A real session always has ~/.claude already, but CI does not, and `ls` on a
+# missing directory exits 2 — which `pipefail` promotes over sort's 0 and `set
+# -e` then turns into a dead script. Create it before anything reads it.
+mkdir -p "${SKILLS_DIR}"
+
 log() { echo "[skills] $*"; }
 
 # bundle spec: "marker-skill-dir|npx-target|extra-args"

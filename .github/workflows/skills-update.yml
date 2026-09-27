@@ -51,9 +51,11 @@ jobs:
 
       - name: Bump the claude-seo pin if upstream released
         id: pin
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           current=$(grep -oP 'REPO_TAG="\$\{CLAUDE_SEO_TAG:-\K[^}]+' .claude/scripts/setup-claude-seo.sh)
-          latest=$(curl -fsSL --max-time 30 \
+          latest=$(curl -fsSL --max-time 30 -H "Authorization: Bearer ${GH_TOKEN}" \
             https://api.github.com/repos/AgriciDaniel/claude-seo/releases/latest \
             | grep -oP '"tag_name":\s*"\K[^"]+' | head -1)
           echo "current=${current}" >> "$GITHUB_OUTPUT"
@@ -79,6 +81,7 @@ jobs:
         id: drift
         env:
           CLAUDE_PROJECT_DIR: ${{ github.workspace }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set +e -o pipefail
           bash .claude/scripts/check-skill-drift.sh | tee drift-report.txt
