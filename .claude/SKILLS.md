@@ -67,7 +67,7 @@ rather than only Claude Code) are listed separately at the end.
 - **cold-email** — Write B2B cold emails and follow-up sequences that get replies.
 - **community-marketing** — Build and leverage online communities to drive product growth and brand loyalty.
 - **competitor-profiling** — When the user wants to research, profile, or analyze competitors from their URLs.
-- **competitors** — When the user wants to create competitor comparison or alternative pages for SEO and sales enablement.
+- **competitors** — When the user wants to create competitor comparison or alternative pages for SEO and buyer-facing use.
 - **content-strategy** — When the user wants to plan a content strategy, decide what content to create, or figure out what topics to cover.
 - **copy-editing** — When the user wants to edit, review, or improve existing marketing copy, or refresh outdated content.
 - **copywriting** — When the user wants to write, rewrite, or improve marketing copy for any page — including homepage, landing pages, pricing pages, feature pages, about pages, or product pages.
