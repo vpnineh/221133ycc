@@ -1,6 +1,6 @@
 # Installed skills
 
-159 skills, provisioned into every session on this repo by the
+162 skills, provisioned into every session on this repo by the
 SessionStart hooks in `.claude/settings.json`. Regenerate with
 `bash .claude/scripts/list-skills.sh`.
 
@@ -67,10 +67,10 @@ rather than only Claude Code) are listed separately at the end.
 - **cold-email** — Write B2B cold emails and follow-up sequences that get replies.
 - **community-marketing** — Build and leverage online communities to drive product growth and brand loyalty.
 - **competitor-profiling** — When the user wants to research, profile, or analyze competitors from their URLs.
-- **competitors** — When the user wants to create competitor comparison or alternative pages for SEO and sales enablement.
+- **competitors** — When the user wants to create competitor comparison or alternative pages for SEO and buyer-facing use.
 - **content-strategy** — When the user wants to plan a content strategy, decide what content to create, or figure out what topics to cover.
 - **copy-editing** — When the user wants to edit, review, or improve existing marketing copy, or refresh outdated content.
-- **copywriting** — When the user wants to write, rewrite, or improve marketing copy for any page — including homepage, landing pages, pricing pages, feature pages, about pages, or product pages.
+- **copywriting** — When the user wants to write, rewrite, or improve marketing copy for any page, including homepage, landing pages, pricing pages, feature pages, about pages, or product pages.
 - **cro** — When the user wants to optimize, improve, or increase conversions on any marketing page or form — including homepage, landing pages, pricing pages, feature pages, lead capture forms, or contact form
 - **customer-research** — When the user wants to conduct, analyze, or synthesize customer research.
 - **directory-submissions** — When the user wants to submit their product to startup, SaaS, AI, agent, MCP, no-code, or review directories for backlinks, domain rating, and discovery.
@@ -102,8 +102,8 @@ rather than only Claude Code) are listed separately at the end.
 - **schema** — When the user wants to add, fix, or optimize schema markup and structured data on their site.
 - **signup** — When the user wants to optimize signup, registration, account creation, or trial activation flows.
 - **site-architecture** — When the user wants to plan, map, or restructure their website's page hierarchy, navigation, URL structure, or internal linking.
-- **sms** — When the user wants to plan, build, or optimize SMS or MMS marketing — including welcome flows, abandoned cart texts, post-purchase, win-back, promotional sends, or transactional/auth SMS.
-- **social** — When the user wants help creating, scheduling, or optimizing social media content for LinkedIn, Twitter/X, Instagram, TikTok, Facebook, or other platforms, or wants to do social listening and engageme
+- **sms** — When the user wants to plan, build, or optimize SMS, MMS, or WhatsApp marketing — including welcome flows, abandoned cart texts, post-purchase, win-back, promotional sends, or transactional/auth SMS
+- **social** — When the user wants help creating, scheduling, or optimizing social media content for LinkedIn, Twitter/X, Instagram, TikTok, or Facebook, or wants to do social listening and engagement triage.
 - **video** — When the user wants to create, generate, or produce video content using AI tools or programmatic frameworks.
 
 ## JuliusBrussee/caveman
@@ -114,7 +114,7 @@ rather than only Claude Code) are listed separately at the end.
 - **caveman-discover** —  Find and label every LLM workflow in the repository so Caveman Cloud groups spend by workflow instead of one bucket.
 - **caveman-evidence-review** —  Read-only review of Caveman Cloud evidence: cost, Cave Score, workflows, traces, latency, errors, routing, savings.
 - **caveman-explore** — Read-only repository explorer for cold-start orientation, broad cross-file localization, or when a direct search failed.
-- **caveman-help** —  Quick-reference card for caveman modes, skills and commands.
+- **caveman-help** —  Quick-reference card for the three caveman skills and their commands.
 - **caveman-learn** — Act on a Caveman learn report - review the ranked token sinks, apply cost-lowering fixes with per-edit consent, and report what those fixes returned.
 - **caveman-manage** —  Inspect Caveman Cloud's experiment lifecycle and block unsafe execution.
 - **caveman-optimize** —  Turn a Caveman optimization observation into an operator-chosen candidate with a paired baseline evaluation.
@@ -122,9 +122,11 @@ rather than only Claude Code) are listed separately at the end.
 - **caveman-stats** —  Show recorded output and cache-read token usage and mode attribution for the current Claude Code session, or locate the host's native usage report.
 - **investigate-first** — Diagnose ambiguous failures before editing.
 - **lean-build** — Build feature work with high overbuilding risk.
+- **megacave** —  Caveman in Classical Chinese: 文言文 register, far fewer characters, technical terms verbatim.
 - **migration** — Implement reversible compatibility-safe transitions.
 - **safe-refactor** — Restructure code while preserving behavior.
 - **surgical-patch** — Fix bugs and small behavior changes at the narrowest responsible layer.
+- **ultracave** —  Caveman at maximum compression: fragments, one word when one word is enough, each fact once.
 - **verify-and-stop** — Prove existing work meets acceptance conditions without expanding scope.
 
 ## emilkowalski/skills
@@ -134,6 +136,7 @@ rather than only Claude Code) are listed separately at the end.
 - **animation-vocabulary** — Reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in; "the iOS rubber-band scroll" → Rub
 - **apple-design** — Apple's approach to interface design and fluid, physical motion, translated for the web.
 - **ask-sonner** — Guide to Sonner, the React toast library — install and wire up the Toaster, pick the right toast() call, promise and loading toasts, updating, dismissing and persisting toasts, styling, theming and
+- **break-ui** — Try to break a piece of UI by feeding it worst-case data — long names, unbreakable emails, one-letter names, missing fields, huge counts, zero items, long labels, non-Latin text, emoji, extreme numb
 - **emil-design-eng** — This skill encodes Emil Kowalski's philosophy on UI polish, component design, animation decisions, and the invisible details that make software feel great.
 - **find-animation-opportunities** — Search a codebase or UI for places that don't animate but should, and reject everything that shouldn't.
 - **improve-animations** — Survey a codebase's animation and motion code as a senior motion advisor, then produce a prioritized audit and self-contained implementation plans for other agents (or cheaper models) to execute.
