@@ -54,6 +54,44 @@ Working tree: `/tmp/claude-0/-home-user-221133ycc/ab6883ab-a26c-5d5a-8186-47eabe
    bytes before first paint, and the shared JS at 226 KB gzip. Cut what
    blocks first paint.
 
+10. Auto Subtitles, Base model (80 MB), desktop. The model downloaded fully,
+    then this error appeared:
+    "no available backend found. ERR: [wasm] TypeError: Failed to fetch".
+    On the next try it worked. Tiny was fine.
+    - This is the ONNX Runtime wasm fetch failing, not the model. Check
+      `ortWasmPaths()` (blob: URL in `paths`), the non-SIMD name that maps to a
+      plain `/ort/` URL, and a backend init that fails once and is never
+      retried within the page.
+    - Overlaps with item 1 (splitting the runtime wasm into parts).
+
+11. Auto Subtitles on the owner's iPhone, both Tiny and Base. The download
+    completes, then the run fails with
+    "Transcription failed partway through: Failed to call OrtRun(). Error Code = 6".
+    - This is an onnxruntime-web 1.14 runtime exception during inference
+      (transformers.js 2.17.2). Suspect wasm memory on iOS, or the SIMD build
+      on that iOS version.
+    - Reproduce on the old WebKit engines with real speech. Try the non-SIMD
+      build and smaller chunks. Consider moving to transformers.js v3 with a
+      newer onnxruntime-web. The fix must be verified on iOS.
+
+12. Phone locked during a job, in Safari and in the home-screen app.
+    - iOS suspends a page's JavaScript while the phone is locked or the page
+      is in the background. Processing while locked cannot be guaranteed.
+    - Do: (a) a Screen Wake Lock (`navigator.wakeLock`, Safari 16.4+) while a
+      job runs, so the phone does not auto-lock; (b) resume after unlock:
+      downloads continue from stored parts, transcription keeps finished
+      chunks and continues from the next one, and long encodes either
+      checkpoint or restart cleanly with a clear message, never a silent hang.
+    - Tell users in the UI ("Keep this screen open").
+
+13. Video to MP3 in the home-screen app (iOS standalone): the MP3 preview
+    shows an error and does not play. The same thing plays in Safari.
+    - Suspect the blob: URL media playback bug in iOS standalone web apps.
+    - Fix options: serve the result through the service worker (a same-origin
+      URL with Range support), or a Web Audio fallback player when the
+      <audio> element errors.
+    - Check every preview (audio and video) in standalone mode.
+
 ## For the owner (Cloudflare dashboard)
 
 - Security, Bots: turn off Bot Fight Mode / JavaScript Detections. Its injected
