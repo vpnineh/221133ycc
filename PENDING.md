@@ -48,6 +48,12 @@ Working tree: `/tmp/claude-0/-home-user-221133ycc/ab6883ab-a26c-5d5a-8186-47eabe
 
 8. Ask the owner again about approving the hero preview (pending from earlier).
 
+9. First-load speed on slow, high-latency paths. The owner's trace showed
+   `loc=DE`, `colo=LHR` and `http/2`, which looks like a VPN exit in Germany
+   served from London. Measure the critical path: number of requests and
+   bytes before first paint, and the shared JS at 226 KB gzip. Cut what
+   blocks first paint.
+
 ## For the owner (Cloudflare dashboard)
 
 - Security, Bots: turn off Bot Fight Mode / JavaScript Detections. Its injected
