@@ -21,7 +21,8 @@ v10.30.1 is the owner's v10.30 plus review fixes. Working tree:
 - First-load path measured: FCP 1556 ms at 400 ms RTT / 1.6 Mbps.
 - The test file `public/theora-probe.ogv` was removed from the export.
 - The golden gate runs `npm run check` again.
-- Hero preview: the owner keeps the current hero.
+- Hero preview: the owner keeps the current hero. With approval, the front
+  pipe now drops into a collar on the monitor station.
 
 ## Still open
 
@@ -32,8 +33,6 @@ v10.30.1 is the owner's v10.30 plus review fixes. Working tree:
    - Home-screen app MP3 preview through the service worker.
    - Wake Lock in a home-screen app (iOS before 18.4 refuses it).
 2. Hero, waiting for the owner's approval (apply only after a yes):
-   - The front pipe ends in the air; proposed: it drops into a collar on the
-     monitor station (screenshots sent).
    - Motion cost: 17 main-thread animations take about 450 ms of every
      second at 4x CPU slowdown (2 ms paused). The two pipe dash flows are
      about 100 ms each. Proposed: run two 6 s cycles, then rest on the same
