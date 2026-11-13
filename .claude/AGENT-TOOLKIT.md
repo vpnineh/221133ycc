@@ -20,15 +20,14 @@ Both are idempotent. Measured: a warm session is ~7ms, a cold one 2m6s.
 | `upstash/context7` | 3 |
 | `anthropics/skills` (`frontend-design`) | 1 |
 | `coreyhaines31/marketingskills` | 52 |
-| `JuliusBrussee/caveman` | 20 |
+| `JuliusBrussee/caveman` (kept: 4 of 20) | 4 |
 | `emilkowalski/skills` | 17 |
-| `aaron-he-zhu/aaron-marketing-skills` (seo-geo arm only) | 16 |
 | `AgriciDaniel/claude-seo` (v2.6.0) | 33 |
 | `Graphify-Labs/graphify` (PyPI `graphifyy`) | 1 |
 
 Global CLIs: `@playwright/cli`, `ruflo`, `graphify`.
 
-170 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
+147 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
 routing guide add about 116 KB (~29,069 tokens) to the start of every session.
 Trim `BUNDLES` in `setup-skills.sh` if that budget matters more than the coverage.
 ## Two collisions the scripts resolve
@@ -180,16 +179,21 @@ claude-seo's, and on every shared skill its SKILL.md is far thinner:
 extensions/, hooks/, schema/), so it reads as a lighter reimplementation.
 Nothing to gain by swapping.
 
-**`aaron-he-zhu/seo-geo-claude-skills`** — retired by its author. All 20 of its
-SKILL.md files are redirect stubs ("this repo is now a signpost") pointing at
-`aaron-he-zhu/aaron-marketing-skills`. Installing it would add 20 stubs. The
-successor's seo-geo arm is installed instead.
+**`aaron-he-zhu/seo-geo-claude-skills`** — retired by its author; all 20 files are
+redirect stubs.
 
-**The other 104 skills in `aaron-marketing-skills`** — ad, email, influencer,
-launch, narrative and social arms. Substantive, but they cover the same ground
-as the 50 marketingskills already installed, and taking them would roughly
-double the session-start cost. Add individual ones with
-`npx skills add aaron-he-zhu/aaron-marketing-skills -s <name> -g`.
+**`aaron-he-zhu/aaron-marketing-skills`** — installed for a while (its seo-geo arm,
+16 skills, ~5.7k tokens per session), then removed. It duplicated claude-seo's
+analysis here, and this environment cannot crawl for claude-seo anyway. The
+prune list in `setup-skills.sh` removes it on every run, so it cannot come back
+unnoticed.
+
+**Caveman's cloud-gateway skills** (`caveman-setup`, `caveman-stats`,
+`caveman-manage`, `caveman-discover`, `caveman-evidence-review`,
+`caveman-learn`, `caveman-optimize`) — they need a service this environment does
+not have. `megacave` and `ultracave` are mode variants reached only by explicit
+command, and `caveman-compress` sends file contents to the model provider. All
+pruned.
 
 **`podo/design-agent-skills`** — a catalogue of 151 skills. From its README:
 "Skills install on demand — the catalogue is a lightweight index, not a bulk
