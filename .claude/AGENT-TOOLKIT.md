@@ -27,7 +27,7 @@ Both are idempotent. Measured: a warm session is ~7ms, a cold one 2m6s.
 
 Global CLIs: `@playwright/cli`, `ruflo`, `graphify`.
 
-147 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
+146 skills, listed with summaries in `SKILLS.md` (plus Claude Code's built-in session-start-hook, which is not counted). Their descriptions plus the
 routing guide add about 116 KB (~29,069 tokens) to the start of every session.
 Trim `BUNDLES` in `setup-skills.sh` if that budget matters more than the coverage.
 ## Two collisions the scripts resolve
