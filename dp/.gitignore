@@ -1,0 +1,8 @@
+bt/data/zips/
+bt/data/bin/
+bt/data/bin_*/
+bt/harness/bin/
+bt/out*/
+bt/work/
+*.npy
+*.bin

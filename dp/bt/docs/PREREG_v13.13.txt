@@ -1,0 +1,264 @@
+PRE-REGISTRATION U-series (12 Nov 2026, written before any result). Ideas never tested in this project. Fixed rules, no search.
+IS = 2016-01..2026 (P1 2016-18 / P2 2019-22 / P3 2023-26); PRE = 2013-2015 from the same files (reported, must not be negative).
+Costs = spread table per round trip (x1) and x2. Gates (as always): PF>=1.15 x1, all 3 periods > 0, PF>1 at x2, t>=2.5, >=8 trades/yr;
+then harness portfolio run + LH veto. No crypto. Only FX majors/crosses with tight spread, gold, US indices.
+U1 FX INTRADAY SEASONALITY (Breedon-Ranaldo 2013: a currency depreciates in its own business hours). Every weekday, fixed legs:
+   EURUSD short 08:00->16:00 London, long 16:00->21:00 London; GBPUSD same two legs; USDJPY long 00:00->06:00 UTC, short 13:00->21:00 UTC;
+   AUDUSD short 23:00->06:00 UTC, long 13:00->21:00 UTC; USDCHF long 08:00->16:00 London. R = (dir*move - cost)/(0.25 x ATR20 daily).
+U2 MONTH-END FX REBALANCING: P = 2nd-last business day of the month, L = last. Signal = sign of SPX500 month-to-date return at P close.
+   SPX up -> USD sold into the month-end fix -> long EURUSD, GBPUSD, AUDUSD (mirror when down). Enter 16:00 NY on P, exit 16:00 London
+   on L. Basket = mean of the 3 pairs. Variant fixed in advance: only |MTD| >= 2%. R unit 0.5 x ATR20.
+U3 INDEX H4 DIP-BUY: server-clock H4 bars; RSI2(H4) < 10 and last completed D1 close > SMA200(D1) -> long next H4 open; exit H4 close >
+   SMA5(H4) or 12 bars; stop 2 x ATR14(H4). NAS100, SPX500, US30. Extra gate: weekly P/L correlation with the live daily MR sleeves
+   reported; harness must improve.
+U4 SCALE-IN for index RSI2 (Connors): base = RSI2<10 & close>SMA200, buy next open, exit close>SMA5 or 7 days, stop 3 ATR. Variant: half
+   size at the first entry; second half at the next open only if the first day closes below the entry price (same stop level).
+   Accepted for harness work only if on >=2 of 3 indices: PF higher AND sum R (per unit of full risk) not lower in >=2 of 3 periods.
+U5 WEEKEND GAP FADE: reopen price (first bar >= reopen + 5 min) vs Friday's last price; if |gap| >= 0.25 x ATR20: fade, target = Friday
+   close, stop = 1 x gap beyond the entry, time exit 24 h after reopen. Cost = 2 x spread table (wide reopen spreads), stress 4 x.
+   XAUUSD, EURUSD, GBPUSD, USDJPY, AUDUSD, NAS100, SPX500.
+U6 CASH-CLOSE IBS: IBS from the cash session (09:30-16:00 NY) and entry AT 16:00 NY (liquid, tight spread) vs the live logic (17:00-NY
+   day IBS, entry at the reopen). Same rule: IBS < thr (NAS 0.3, US30 0.15, SPX 0.2) -> long; exit when that clock's IBS > 0.8 or 4 days;
+   stop 2.5 x ATR14. Harness work only if sum R is >= 15% higher than the 17:00 control in >= 2 of 3 periods on >= 2 of 3 indices.
+U7 ASIAN-SESSION RANGE FADE (FX range regime, intraday): M15 bars 22:00-05:00 UTC; close < lower BB(20, 2 sd) -> long at next bar open,
+   close > upper -> short; exit at first M15 close across SMA20 or 06:00 UTC; stop = 2 x (BB half-width at signal) from entry.
+   EURUSD, GBPUSD, EURGBP, AUDUSD, USDCHF, USDCAD, EURCHF. Must pass at x2 costs AND be positive at x3 (night spreads are wide).
+--- RESULTS U1-U7: all rejected by the gates except U2 on GBPUSD (IS PF 1.65, t 2.09, P1/P2/P3 all +, PRE 2013-15 +13.7R) which
+    fails only t>=2.5; EURUSD/AUDUSD have a negative period.
+--- added after U1-U7 (before any of these results):
+U2b MONTH-END GBPUSD, confirmation on NEW data: same rule, GBPUSD only, on HistData 2010-12..2012-12 (binold; SPX500 from the same
+   source). Harness work only if (a) the 2010-12 sample sum R > 0 AND (b) the full sample 2010-12..2026 has t >= 2.5 at x1 costs and
+   PF > 1.15 at x2 costs. Also reported: EURUSD is not available in binold -> GBPUSD only.
+V16 LIMIT ENTRY for the index MR sleeves (Connors intraday-pullback entry): signal as live family (RSI2<10 & close>SMA200; exit close>SMA5
+   or 7 days; stop 3 ATR from the fill) and IBS (IBS<thr; exit IBS>0.8 or 4 days; stop 2.5 ATR). Variant: instead of buying the next
+   open, a buy limit at signal close - 0.5 x ATR14, valid for the next day only (filled if next low <= limit; at the open if it gaps
+   below). Harness work only if on >= 2 of 3 indices sum R is higher in >= 2 of 3 periods AND PF is higher, for the same sleeve family.
+--- RESULT U2b: PASSED (2010-12 new data +12.8R / 25 months; full sample n=183, t=3.39, PF 1.92, PF x2 1.76; all 5 sub-periods > 0,
+    but decaying: +12.8 +13.7 +16.4 +6.3 +2.5). V16 rejected (sum R lower). -> GBP MONTH-END goes to implementation.
+--- added before running (implementation choices, fixed rule for choosing):
+U2c stop for the EA sleeve: k x ATR20 with k in {0.5, 0.75, 1.0} simulated on the M1 path (stop hit -> exit at the stop). If all three
+    keep t >= 2.5 the middle one (0.75) is used; otherwise the largest k that does. R is then measured in units of the stop.
+U2d same month-end rule on the EA's existing FX symbols (no new symbol needed): EURGBP (SPX up -> short EURGBP = GBP bought), USDJPY
+    (SPX up -> short USDJPY). Qualifies only with full-sample t >= 2.5, PF x2 > 1.15 and all 5 sub-periods > 0 (same bar as GBPUSD).
+    Diagnostics only (no rule change): split of the GBPUSD move into P 16:00 NY -> L 07:00 London and L 07:00 -> 16:00 London.
+--- RESULT U2c/U2d: with a real stop GBP MONTH-END keeps t 2.5-2.8 only at k>=0.75; x2 t 2.2-2.3; 2023-26 ~0 (-0.8R / +1.7R): the edge
+    has faded -> NOT implemented (needs a 9th symbol for <= ~0.05%/month); watch list. EURGBP / USDJPY versions fail.
+=== W-series (12 Nov, before any result). Daily bars (17:00 NY day). IS 2016-26 (P1/P2/P3), PRE 2013-15, OOS 2009-06..2012-12 (HistData
+    zips / binold, never used for these rules). Costs = spread table x1 / x2. Per-market gates: PF>=1.15, P1/P2/P3 all > 0, PF x2 > 1,
+    t >= 2.5, PRE >= 0, >= 8 trades/yr (W13: basket-level, basket t >= 2.5 and all periods > 0). A market that passes must ALSO be
+    positive in OOS 2009-12 before any harness work (56 market x family cells -> false positives expected without this).
+W9  TREND PULLBACK, both sides (sell rallies in a downtrend / buy dips in an uptrend): RSI2 < 10 and close > SMA200 -> long next open;
+    RSI2 > 90 and close < SMA200 -> short. Exit: close beyond SMA5 in the trade's favour, or 7 days. Stop 3 x ATR14.
+W10 TURTLE SOUP (failed breakout, range regime): prior 20-day low (made >= 3 days ago) is broken intraday but the day closes back above
+    it -> long next open; stop = that day's low - 0.1 ATR; target 2R; time exit 10 days. Mirror at the 20-day high.
+W11 NR7 BREAKOUT with trend: day with the narrowest range of 7 -> next day buy stop at its high + 0.05 ATR if close > EMA200 (sell stop
+    at low - 0.05 ATR if below); stop at the other side of the NR7 bar; exit close beyond SMA10 against the trade or 20 days.
+W13 SHOCK CONTINUATION: |close - prev close| >= 2 x ATR14(prev) and close in the extreme 25% of the day's range in that direction ->
+    enter next open with the move; exit at the close of the 3rd day; stop 1.5 ATR.
+Markets: USDJPY AUDJPY EURJPY GBPJPY CADJPY EURUSD GBPUSD AUDUSD NZDUSD USDCAD USDCHF EURGBP XAUUSD XAGUSD (+ NAS100 as a control for W9).
+--- RESULT W-series: W9 basket PF 0.97, W10 PF 0.88, W11 PF 0.66, W13 basket PF 1.28 t 1.63 (all periods + but below the gate). No cell
+    passes all gates (EURJPY W9-long t 2.87 but 6.5 trades/yr, 1 of 42 cells -> noise). All rejected.
+X7 (before any result) GAP-LONG on the other US indices: the live NAS GAP-LONG rule unchanged (gap = ln(09:30 NY open / 16:00 close),
+   z vs previous 60 gaps <= -2 -> buy 09:30, stop 1 x daily ATR, target = previous 16:00 close, exit 11:00 NY) on SPX500 and US30
+   (NAS100 = control). Gates as always (PF>=1.15, P1/P2/P3 > 0, PF x2 > 1, t >= 2.5 -> for this rare sleeve t >= 2.0 on IS plus
+   PRE 2013-15 >= 0 and, for SPX500, OOS 2010-11..2012 > 0), then harness portfolio + LH.
+--- RESULT X7: SPX500 (IS t 0.8, 2010-12 negative) and US30 (PF 0.89) rejected.
+=== Y-series (12 Nov, before any result). IS 2016-26, PRE 2013-15, OOS 2009-06..2012-12 (binold) where available.
+Y1 LONDON-OPEN BREAKOUT OF THE ASIAN RANGE (classic, never tested here): range = high/low of 00:00-07:00 London. From 07:00 to 10:00
+   London the first M5 close beyond the range -> enter at the next M5 open in that direction (one trade per day); stop = opposite
+   side of the range; exit 2R target or 16:00 London. Skip days with range > 1.0 x ATR20 or < 0.15 x ATR20. XAUUSD, GBPUSD, EURUSD,
+   USDJPY. Gates: PF>=1.15, P1/P2/P3 > 0, PF x2 > 1, t >= 2.5, PRE >= 0, then OOS > 0.
+Y2 H4 TREND PULLBACK both sides (sell rallies in an H4 downtrend / buy dips in an H4 uptrend): trend up = H4 close > EMA200(H4) and
+   EMA50(H4) > EMA200(H4) and ADX14(H4) > 25; signal = RSI2(H4) < 10 (mirror: > 90 in a downtrend) -> enter next H4 open; exit H4
+   close beyond SMA5(H4) in favour or 12 bars; stop 2 x ATR14(H4). XAUUSD, XAGUSD, USDJPY, AUDJPY, EURUSD, GBPUSD. Same gates
+   (long / short / both reported; a side counts only with >= 8 trades/yr).
+--- RESULT Y1: London breakout of the Asian range LOSES in every sub-period on gold (PF 0.84, t -4.2, n 3161) and GBPUSD (PF 0.87,
+    t -3.9), EURUSD PF 0.90; USDJPY flat. Y2: H4 trend pullback negative everywhere (gold PF 0.77). Both rejected.
+Y3 (before any result; motivated by Y1: these breakouts fail) LONDON FALSE-BREAKOUT FADE: same Asian range and day filters. After an
+   M5 close beyond the range between 07:00 and 10:00 London, the first later M5 close back INSIDE the range (until 11:00) -> enter at
+   the next M5 open back toward the range; stop = extreme reached since the breakout (at least 0.10 x ATR20 away from the entry);
+   target = opposite side of the Asian range; time exit 16:00 London; one trade per day. XAUUSD, GBPUSD, EURUSD, USDJPY.
+   Gates: PF>=1.15, P1/P2/P3 > 0 (2016-18 / 2019-22 / 2023-26), PF x2 > 1, t >= 2.5, PRE 2013-15 >= 0, OOS 2009-12 > 0.
+
+=== Z-series (pre-registered 12 Nov 2026, before any result). PURPOSE: the weak regime of candidate F, measured ex-ante on both samples:
+    months that start with SPX500 20-day realised vol rank >= 0.7: IS 1.31 %/mo vs 2.65; LH 0.81 vs 1.68. Index MR sleeves when SPX < SMA200:
+    IS +0.01R (247 trades), LH -0.00R (51 trades). Gold-down / gold-range weakness is NOT consistent across the two samples (no target there).
+Z1 INDEX INTRADAY MOMENTUM, "noise area" (Zarattini-Aziz-Barbon 2024, parameters taken from the paper, no search):
+   NY cash session 09:30-16:00. O = 09:30 open, C1 = previous session 16:00 close. For each half-hour mark m (10:00..15:30):
+   move(d,m)=|P(d,m)/O(d)-1|, sigma(d,m)=mean of move over the previous 14 sessions. UB=max(O,C1)*(1+sigma), LB=min(O,C1)*(1-sigma).
+   At each mark: P>UB -> long, P<LB -> short, otherwise flat; all closed at 15:55. Fill = next M1 open. 
+   Z1a = exactly this. Z1b = trailing: a long is kept only while P > max(UB, session mean price) (mirror for shorts) - the paper's VWAP stop
+   with the time-weighted mean because there is no volume. Symbols NAS100, SPX500, US30. R unit = 0.5 x ATR14 daily (no hard stop in the screen).
+   Costs: table per round trip NAS 2.6 / SPX 1.0 / US30 5.9 points (x1), x2. A flip counts as two round trips.
+   Gates (as always): PF>=1.15 x1, P1/P2/P3 all > 0, PF>1 at x2, t>=2.5; PRE 2013-15 not negative; binold 2010-11..2012 (NAS, SPX) reported.
+   Purpose gate: mean R per day in Ivol-hi months must be > 0 and >= the Ivol-lo mean (it must earn where the portfolio is weak).
+   Only if a symbol passes: harness sleeve with a real stop + portfolio run + x2 + LH veto + challenge.
+Z1 RESULT: FAIL at the table costs (NAS c1 PF 0.91, SPX 0.83, US30 0.90). Gross edge is real and stable (NAS c0 t=+4.4, positive in all 5
+   periods incl. unseen 2010-15; SPX t=+3.2) but 1.4 round trips/day cost more than it earns. Purpose gate: vol>=0.7 not better than vol<0.7
+   (NAS 0.074 vs 0.079 gross). In SPX<SMA200 NAS gross +0.124R/day PF 1.58, c1 PF 1.32 t=1.9 (358 days) - below the t gate. Not accepted.
+Z2 (registered after Z1, before its result; ONE design change with a cost rationale, no search): ONE trade per day. First mark (10:00..15:30)
+   with P>UB or P<LB -> enter in that direction at the next M1 open; hard stop = the session open O (checked on M1 high/low, filled at O);
+   otherwise exit 15:55. No re-entry, no flip. Risk = |entry-O|, R unit = that risk (real stop). Skip the day if risk < 0.1 x ATR14 daily.
+   Same symbols/costs/gates as Z1, reported for all days and for the two target regimes (SPX<SMA200; vol rank>=0.7). A regime-only
+   version may go forward only if it passes ALL gates inside that regime (PF>=1.15 c1, PF>1 c2, t>=2.5, no negative period).
+Z3 BEAR-MARKET TREND SHORT (fills the regime where index MR earns 0): H1 bars. Condition: last completed NY-day close of SPX500 < its SMA200
+   AND the symbol's own daily close < its SMA200. Entry: H1 close < lowest low of the previous 240 H1 bars -> short at next H1 open.
+   Initial stop = entry + 1.0 x ATR14 daily. Exit: H1 close > highest high of the previous 120 H1 bars, or stop, or the condition ends
+   (SPX daily close back above SMA200). One position per symbol. Symbols NAS100, SPX500, US30. R = pnl/initial risk. Costs table x1/x2.
+Z4 RISK-OFF YEN (same engine as Z3, same condition on SPX500 only): short AUDJPY and short USDJPY on a 240-H1 low breakout while
+   SPX500 < SMA200. Costs AUDJPY 0.017, USDJPY 0.015. Same exits. Gates for Z3/Z4: PF>=1.3 c1 (few trades), PF>1.15 c2, t>=2.0 with >=40
+   trades in the pooled basket, IS (2016-26) and PRE+LH (2010-15) both positive.
+Z2 RESULT: FAIL (NAS c1 PF 0.95, SPX 0.91, US30 0.93; in SPX<SMA200: NAS c1 PF 1.12 t=0.85). Z3 RESULT: FAIL, negative (basket PF 0.62,
+   t=-2.05: index breakdowns in bear markets revert). Z4 RESULT: FAIL (yen basket PF 1.05, t=0.15). No intraday-momentum or bear-trend sleeve.
+Z5 INDEX BEAR GATE (registered before the runs): the index MR sleeves that still trade in any regime - DOW IBS (7), NAS RSI2 (8), NAS IBS (9) -
+   get REG 2 (own daily close > EMA200), like SPX RSI2 / DOW RSI2 already have a trend condition. Reason: ex-ante, index MR when SPX<SMA200
+   made +0.01R (247 trades, IS) and -0.00R (51 trades, LH). Expected: same return, lower drawdown in bear markets. Accept only by the
+   standing rule (%/mo not lower by more than 0.03, mDD lower, worst 12-mo not worse, x2 agrees, LH not lower by more than 1k and mDD not
+   higher). Runs: z5 (F + REG.7=2,REG.8=2,REG.9=2), z5_c2, lh_z5.
+Z5 RESULT: LH veto - lh_z5 218,435 vs 222,616 (-4.2k), mDD 8.66 vs 8.14. REJECTED (index MR in a bear market is zero on average but its
+   winners matter for the recovery; the gate does not lower drawdown out of sample).
+Z6 RISK-REGIME MULTIPLIER (registered before the numbers). Observation used: month-start SPX vol rank>=0.7 -> portfolio earns about half
+   in BOTH samples. Rule: every sleeve's risk x ML when the previous completed day's SPX500 20d-vol rank (250d) >= 0.7, x MH otherwise.
+   Primary pair (same average risk): MH 1.15 / ML 0.60. Neighbours: 1.10/0.75, 1.00/0.60. Offline first (daily returns of F scaled by the
+   previous day's regime; linear, ignores brake/guard interaction): go to the harness only if in BOTH IS and LH: %/mo higher, mDD not
+   higher, Sharpe higher by >= 0.10, worst day not below -3.9%. Otherwise rejected without a harness run.
+Z6 RESULT: REJECTED offline. At daily resolution the IS Sharpe is the same in both regimes (vol-hi 2.25, vol-lo 2.29; x2 1.90 / 1.90);
+   only LH differs (1.33 vs 2.05). Primary pair: IS %/mo 2.29 (not higher), mDD 9.00 (higher), worst day -4.42. The monthly "weak regime"
+   is a difference of level, not of risk-adjusted edge -> nothing to exploit by moving risk between regimes.
+Z7 MECHANISM TEST ON OTHER PAIRS (registered before the result). Watch-list observation (found AFTER looking at both samples, so not usable
+   by itself): the FX mean-reversion sleeves AUDJPY BB + EURGBP MR made -0.04R (103 trades, IS) / -0.01R (30, LH) when the SPX vol rank at
+   entry was >= 0.7, against +0.24R / +0.20R otherwise. Independent test of the mechanism on FX pairs the EA does NOT trade (daily bars
+   2013-2026, every FX pair in ml/d_*.csv except AUDJPY, EURGBP, USDJPY): the EURGBP MR rule (z50 = (close-SMA50)/SD50; |z| >= 2.0 ->
+   fade at the close; exit when z crosses 0 or after 10 days; stop 2 SD beyond the entry; R = pnl/risk - 0.03R cost). Regime = SPX vol rank
+   of the previous completed day. Statistic: mean R(vol<0.7) - mean R(vol>=0.7), t computed on entry-day averages (pairs are correlated).
+   Confirmed only if the difference is > 0 with t >= 2.0 AND positive in both halves (2013-19, 2020-26). Only then: harness test of
+   "no new AUDJPY BB / EURGBP MR entry when SPX vol rank >= 0.7" with the standing acceptance rule. Otherwise the item leaves the list.
+Z7 RESULT: NOT CONFIRMED. 18 untraded pairs, 1,845 trades: calm +0.004R vs turbulent -0.086R, difference of day-means +0.069, t=+1.42
+   (< 2.0); 2013-19 the sign is reversed (-0.034), 2020-26 +0.151 (t 2.49). The item leaves the watch list; no filter added.
+
+=== L-series: LIFECYCLE ECONOMICS (registered 12 Nov 2026 before any run). New fact from the user: after EVERY payout the firm hands over a
+    new account, so no buffer can be kept: the real world is "payout every 14 days, everything above the initial balance leaves" (b=0).
+    Until now the funded risk (1.0%) was chosen so that the account never dies. The right objective is net income per unit of time over
+    the whole cycle: challenge (fee, time, pass/abandon) -> funded (payouts) -> death (frozen at the -9% guard or a rule breach) -> new challenge.
+    L1: only InpFastRiskFunded changes: 1.0 (have) / 1.5 / 2.0 / 3.0; everything else = F. 39 quarterly fresh funded starts x 24 months,
+    PAYD=14 PAY1=21 PAYB=0, costs x1 and x2. Per run: death day (first day equity low <= 91.2k, or a day loss >= 5% of the initial
+    balance from the day reference, or equity <= 90k), total withdrawn.
+    Lifecycle Monte Carlo: challenge outcomes = the 39 chF starts with the -6% abandon rule (fee paid per attempt), funded segments drawn
+    at random; a surviving account continues with another segment; a dead one goes back to the challenge. Split 80%, fee 0.8% of the
+    account per attempt (25k-type pricing; 0.55% reported too). Output: net income per month in % of the account size, deaths per year,
+    share of time spent in challenges.
+    Decision rule: the default changes only if a higher risk gives a higher net income at x2 costs AND at x1 AND on LH (14 fresh starts
+    2010Q3-2013Q4, x1+x2), each by at least 10% relative; among the passing values take the LOWEST risk within 5% of the best x2 income
+    (more deaths are a practical cost not in the formula). Otherwise 1.0 stays and the table is reported as an option.
+Z8 GOLD SESSION DRIFT (registered before the result; the documented "up in Asia, down around the London fixes" pattern). Fixed legs, every
+   weekday: A = long XAUUSD 23:00 UTC -> 07:00 UTC; B = short 08:00 London -> 15:00 London. R = (dir*move - 0.70)/(0.25 x ATR20 daily).
+   Gates as the U-series (PF>=1.15 x1, PF>1 x2, t>=2.5, P1/P2/P3 > 0, 2010-15 not negative).
+Z9 INDEX TURN-OF-MONTH: long at 15:55 NY of the 2nd-last trading day of the month, exit 15:55 NY of the 3rd trading day of the next month.
+   NAS100, SPX500, US30; costs table; R = (move - cost)/(1.0 x ATR14 daily). Gates as above on each symbol and the basket (>= 8 trades/yr).
+   Extra: reported separately for SPX<SMA200 months (does it earn in the weak regime?).
+Z8 RESULT: FAIL. A (long 23->07 UTC): gross t=+5.6, PF 1.31, positive in all 5 periods - a real drift - but after 0.70 cost PF 0.94
+   (only 2023-26 positive, where the cost is small against the ATR). B: gross t=2.3, after cost PF 0.88. Z9 RESULT: FAIL (basket PF 1.31,
+   t=1.44; 2013-15 negative; in SPX<SMA200 months NAS +0.48R but n=29, t=1.7).
+F1 RESULT (the user's real world, b=0, 39 fresh funded accounts x 24 months): frozen at the guard v13.12 10.3% (x2 12.8%) -> F 0.0% (x2 0.0%);
+   mean %/mo 2.01 -> 2.11 (x2 1.62 -> 1.73); worst account 0.49 -> 0.78 %/mo; ever below 93k 35.9% -> 15.4%. F CONFIRMED.
+L1 first result: RF 2.0 x1: 28% of accounts dead in 24 months, alive 2.59 %/mo (not 4.2: the 4% brake, soft daily stop and caps bind),
+   lifecycle net 1.96 vs 1.66 (+18%).
+L2 (registered before any run): ROOM-PROPORTIONAL RISK for an account that is reset at every payout. risk = base x clamp(room^e, CPL, 1),
+   room = (min(balance,equity) - 90% of initial)/(10% of initial): full risk on a fresh account, less as the floor gets closer (replaces
+   the 4% brake). Three fixed candidates, no search: La base 2.0 e=1 CPL 0.2 | Lb base 2.0 e=2 CPL 0.2 | Lc base 3.0 e=2 CPL 0.15.
+   Same 39 starts, x1 then x2, same lifecycle formula and the same decision rule as L1 (>= +10% net income at x1, x2 and LH; lowest-risk
+   candidate within 5% of the best x2 income).
+C-series: CHALLENGE UNDER THE LIFECYCLE OBJECTIVE (registered before any run). A month without a funded account costs about 1.65% of the
+   account (F's net funded income), a challenge attempt 0.55-0.8% => one attempt = about 15 days of income. Objective
+   J = E[days to funded, retries included] + 14.8 x E[attempts], abandon rule fixed at -6% (the documented rule); a rule breach and an
+   abandon cost the same. Today (chF): J = 155 (pass/attempt 77%, 105 days per attempt, E[T] 136 days).
+   Cells (turbo risk P1 / P2, everything else unchanged unless stated): C1 3.0/2.5 | C2 3.5/3.0 | C3 3.5/3.0 + ramp start 3.0 |
+   C4 4.0/3.5 + ramp start 3.0 + soft daily stop 4.0. 39 starts, x1 and x2.
+   Decision: defaults change only if J improves by >= 10% at x1 AND at x2 AND on the unseen LH starts (2010Q3..2014Q4) J is not worse;
+   among passing cells the lowest risk within 5% of the best x2 J.
+L2 first result (x1): Lb (base 2.0, room^2): 0/39 dead, min equity 92,278 (F at 1.0: 92,017), mean 2.91 %/mo (2.11), lifecycle net 2.25 (1.66).
+   BUT the daily tail: worst day -4.58%, 108 account-days <= -4% (F: worst -3.58%, none <= -4%). The intraday guard closes at -4%; live
+   slippage could turn such a day into a breach of the 5% rule. Lb as it is FAILS the standing safety bound (worst day not below -3.9%).
+L3 (registered before the runs): daily-limit-safe versions of Lb. Le = Lb + InpDailyRoomMult 1.0 (today's loss + all open stops + the
+   new trade <= 4% of the account: even if every stop is hit the day ends at -4%). Ld = Lb + InpDailyRoomMult 1.25.
+   Acceptance (all needed): worst day not below -3.9% at x1 and x2 and no day <= -4%; 0 dead accounts at x1 and x2 or not more than F;
+   lifecycle net income >= +10% vs F at x1, x2 and LH (fresh LH starts 2011Q3..2013Q4); worst account not negative.
+   Sensitivity reported for every cell: lifecycle income if every day <= -4.25% is counted as a breach.
+C2 RESULT: chC2 (3.5/3.0) J=225 vs 155 (pass 59%, E[T] 200 d) -> worse; higher challenge risk rejected (C1 reported when done).
+L3 RESULT: Le (Lb + daily room 1.0): mean 1.75 %/mo (F 2.11), worst day -4.40%, 18 account-days <= -4% -> worse than F on income AND on
+   the daily tail (only two 2% positions fit; the tail comes from giving back open profit, not from the stops). REJECTED; Ld not run
+   (it sits between Le and Lb and cannot meet "no day <= -4%").
+   Lb sensitivity: counting every day <= -4.25% as a breach the lifecycle income is 1.68 vs F 1.66; at <= -4.0% it is 1.19. Lb REJECTED
+   (fails the -3.9% worst-day bound; its gain exists only if the -4% emergency close never slips by 0.25%).
+   L1 RESULT: RF 2.0 plain: x1 +18% net with 28% dead accounts, x2 1.45 vs 1.35 (+7%) -> fails the 10% rule. Funded risk stays 1.0.
+C RESULT: C2 (3.5/3.0) J 225 vs 155 -> rejected. C1 (3.0/2.5): pass 79%, 96 d/attempt, E[T] 121 d (136), J 140 vs 155 = -9.7%: under the
+   10% rule -> no change (within the noise of 39 starts; left as a user option, the inputs exist).
+
+=== NEW FACTS FROM THE USER (12 Nov): payouts are MONTHLY (all profit leaves, new account) -> real world = PAYD=30 PAY1=30 PAYB=0.
+    Real FundedNext costs measured from the user's Strategy Tester log/report (v13.11, FundedNext-Server 3, M1 OHLC): spread at the EA's
+    orders (median): XAUUSD 0.28, XAGUSD 0.0225, NDX100 2.09, SPX500 0.58, US30 3.00, AUDJPY 0.0095, USDJPY 0.004, EURGBP 0.0001;
+    commission 1.5 USD per lot per side on FX/metals, none on indices; FX swap 0. The research cost table (XAU 0.70, NAS 2.6, SPX 1.0,
+    US30 5.9, AUDJPY 0.017, USDJPY 0.015) is 1.2x-2.3x the real cost: every "x1" result is conservative. No rejected sleeve flips:
+    all cost-killed ideas had PF < 1 at the table x1 = about 2x the real cost.
+    Worst-day anatomy of F (25 worst days): 3-6 open gold positions on most of them; the loss is open profit given back, not stops.
+D-series (registered before any run): the only blocker of higher funded risk is the daily tail. D2 = Lb (base 2.0 x room^2, CPL 0.2) +
+    the EA's own daily limit set to 4% (intraday guard closes everything at -3% of the day reference instead of -4%; 2% of slippage
+    margin to the firm's 5%). D3 = Lb + own daily limit 4.5% (guard -3.5%). Monthly payouts. 39 fresh accounts x 24 months, x1 and x2.
+    Baseline = F with monthly payouts (mf / mfc). Acceptance (all needed): worst day not below -3.9% and no day <= -4% at x1 and x2;
+    dead accounts not more than F; lifecycle net income >= +10% vs F at x1, x2 and on LH fresh starts; worst account not negative.
+MONTHLY PAYOUT RESULT (F, 39 fresh accounts x 24 months, PAYD=30): 0 dead, mean 2.13 %/mo (14-day: 2.11), worst day -3.58%, min equity
+   91,631 (14-day: 92,017), lifecycle net 1.67. Monthly vs 14-day payouts make no material difference.
+D2 RESULT (17 of 39 runs, stopped): worst day -5.30%, 4 account-days <= -4.5%, 3 accounts breached the daily rule. The earlier guard
+   (-3%) does not cap the day: with 2x positions a one-minute gap passes through it. REJECTED (D3 not run: same mechanism, later guard).
+   Funded risk stays 1.0. The daily tail (open gold profit given back, index crash days) is the binding constraint of the whole design.
+
+=== G-series: UNIVERSE COMPLETION (registered before any download/result). The user allows any non-crypto symbol with a reasonable spread.
+    Already scanned (v13.11, prereg_new_markets): DAX, CAC, FTSE, Nikkei, ASX, Brent, 5 yen crosses, AUDUSD, NZDUSD, 6 MR crosses - only
+    Nikkei IBS passed and it duplicates the US index MR sleeves. Z7 (this session): z-MR on 18 untraded pairs, mean -0.025R.
+    Now the rest of the tradable universe with the SAME fixed rule families and gates (no search):
+    F3 Donchian trend both sides (close > 55d high and > EMA200, mirror short; stop 2.5 ATR; trail 3 ATR; exit 20d opposite channel):
+       WTIUSD, EURUSD, USDCAD, USDCHF, EURNZD, GBPNZD, GBPCAD, AUDCHF, CADCHF, NZDCAD, NZDCHF, HKXHKD.
+    F5 z-MR (EURGBP rule): EURNZD, GBPNZD, GBPCAD, AUDCHF, CADCHF, NZDCAD, NZDCHF.
+    F1 IBS long and F2 RSI2 long: HKXHKD.
+    Costs per round trip: WTI 0.04, EURUSD 0.00008, USDCAD 0.00015, USDCHF 0.00015, EURNZD 0.0003, GBPNZD 0.0004, GBPCAD 0.0003,
+       AUDCHF 0.0002, CADCHF 0.0002, NZDCAD 0.00025, NZDCHF 0.00025, HKXHKD 10. x1 and x2.
+    Gates: PF>=1.15 x1, P1 2016-18 / P2 2019-22 / P3 2023-26 all > 0, PF>1 x2, t>=2.0 (screen), >=8 trades/yr. A passer then needs: low
+    correlation with the live sleeves, and in the harness (fresh accounts, monthly payouts) more income without a worse daily tail.
+G RESULT: nothing passes. F3 trend: WTI PF 1.37 (t 0.64, P1 and P3 negative), HK50 1.29 (t 0.72); every FX pair negative or zero
+   (EURUSD 0.51, USDCAD 0.60, USDCHF 0.65, EURNZD 0.50, GBPNZD 0.52, GBPCAD 0.45, CADCHF 0.39, NZDCAD 0.44, AUDCHF 0.99, NZDCHF 0.94).
+   F5 z-MR: GBPCAD 1.19 (t 0.7), NZDCAD 1.30 (t 1.1), others < 1. HK50 IBS 0.91, RSI2 0.78. Controls behave (gold trend 2.48, EURGBP MR
+   1.61, NAS IBS PASS). Together with v13.11: 15 of 17 FX pairs lose with the 55-day breakout rule in 2016-26 (win rate 25-37%).
+G2 FX BREAKOUT FADE (registered before any fade result; the direction was SEEN in 2016-26 on 17 pairs, so 2016-26 is discovery, not proof):
+   universe = every FX pair with daily bars except the three the EA trades (AUDJPY, USDJPY, EURGBP). Signal = the F3 breakout
+   (close > 55d high and > EMA200 -> SHORT next open; mirror). Stop 2.5 ATR14, target 2.5 ATR14, time exit at the close after 20 trading
+   days. One position per pair. Cost = pair table (0.0003 / 0.03 where not listed), x1 and x2. R = pnl / (2.5 ATR).
+   Variant b (only other exit): no target, exit when close crosses SMA20 (mirror), same stop and time exit.
+   Statistic on entry-date averages (pairs are correlated). Gates: 2016-26: PF>=1.15 x1, PF>1 x2, t>=2.5, P1/P2/P3 > 0, and the pairs
+   NOT in the discovery set must be positive on their own. PROOF: 2010-2015 (hd_oos 2009-12 + files 2013-15, 14 pairs): mean R > 0,
+   PF>=1.1, t>=1.5. Only then: correlation with the live sleeves and harness work.
+G2 RESULT: REJECTED. 25 pairs. 2016-26: G2a PF 1.12 (< 1.15), day-clustered t=+3.41, P2 2019-22 negative; new pairs alone PF 1.12,
+   t 1.53. PROOF 2010-15: G2a R=-0.062, PF 0.86, t=-1.16; G2b PF 0.99. FX was trending in 2010-15 and mean-reverting in 2016-26: the
+   fade (and the trend) is a regime bet, not an edge. No sleeve.
+
+=== S-series: SMALL ACCOUNT / MIN-LOT GRANULARITY (registered 13 Nov before the runs). Source: the user's FundedNext tester run of v13.13
+    (10,000 USD, 2024-2026): Oct-Nov 2026 lost -5.7% (funded, 1%) / -7.7% (phase 1). In that window the journal shows 35 GOLD and 14 index
+    signals refused with "min-lot risk (needs 0.01 lot min, risk 85 planned)": at 2026 prices one minimum lot risks more than 1.5x the
+    planned risk on a 10k account (202 such refusals in 2026, 100 in 2025, 0 in 2024). Only the FX sleeves traded: EURGBP MR 8 trades
+    -398 (EURGBP fell 2.1% in a straight line), JPY GOTOBI 11 trades -243. Not a market regime the portfolio cannot handle: the portfolio
+    was reduced to its FX part. (Diagnostic done before this registration: EURGBP MR re-entries after a stale exit earn +0.09R in IS
+    and in LH - blocking them would cost about 4R per decade - so no "re-arm" rule.)
+    Test: funded, 2024-01-01..2026-10-09, monthly payouts (harness), BAL 10k / 25k / 50k / 100k x InpMinLotOverRisk 1.5 (now) / 2.5 / 4.0
+    (InpMaxRiskPerTradeR stays 2.0 = hard cap of 2x the base risk on any min-lot trade).
+    Reported: %/month, refusals, worst day, lowest equity. Decision rule: the default changes only if for 10k and 25k the monthly result
+    rises by >= 15% relative, the worst day stays above -3.9% and the lowest equity stays above the guard, and 100k is unchanged
+    (it must be: no refusals there); then confirmation on 10 years at 25k (x1, x2) before it goes into the EA.
+
+=== RESULT S-series + Oct-2026 diagnosis (2026-11-13) ===
+User MT5 v13.13 10k test, window 2026-09-17..11-09 closed -650.56: EURGBP MR 8 trades -397.83, GOTOBI 11 trades -242.76; no gold trades.
+Cause: 35 GOLD + 14 index signals refused "min-lot risk" (10k account at 2025-26 prices), not a market regime.
+S-series funded 2024-01..2026-10 monthly payouts (%/mo / refusals / worst day / min eq): 5k 1.73/1168/-2.66/-3.88; 10k 2.29/493/-3.20/-3.99;
+15k 3.03/273/-3.58/-3.10; 25k 3.05/122/-3.77/-3.15; 50k 3.12/59/-3.22; 100k 3.18/55/-3.34.
+MLOR on 10k: 2.0 -> 2.63 (worst day -3.78, min eq -5.25); 2.5 -> 2.80 (-4.08 fails); 4.0 -> 2.98 (-4.08 fails). Default 1.5 unchanged (rule).
+EURGBP MR re-entry after stale exit: IS 53 trades +4.8R, LH 40 trades +3.6R -> kept.
+Final v13.13 (payout simulator removed from EA, harness-only; small-account notice added): default funded 10y deals == s2_slk3_15 (cmp);
+PAYD=30 PAY1=30 PAYB=0 -> 81 payouts 267930.70 == pm_f; 10k chain 2024: P1 48d, P2 14d, funded +81.76%, SMALL ACCOUNT line = 363 refusals.

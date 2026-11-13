@@ -1,0 +1,20 @@
+PRE-REG range-regime sleeves (Nov 2026, before any result). Range regime = gold D1 ADX14 < 20 on the signal day (as known at t).
+Fixed rules, no search. Costs x1 / x2 (XAU 0.35, XAG 0.03 per round trip). Daily bars on the 17:00 NY day (as the EA).
+R1 GOLD BB-FADE: ADX<20 and close < BB20 lower (2 sd) -> long next open; close > upper -> short. Exit close crosses SMA20
+   or 10 days; stop 2 ATR.
+R2 GOLD RSI2 BOTH SIDES in range: ADX<20, RSI2<10 long / >90 short (no SMA200 filter). Exit close crosses SMA5 or 5 days; stop 2 ATR.
+R3 GOLD/SILVER RATIO MR: z50 of log(XAU/XAG) >= 2 -> short gold + long silver (equal ATR risk), <= -2 mirror; exit z crosses 0
+   or 20 days; stop when |z| >= 3.5. Measured in R of the combined stop. Any regime (natural range trade).
+R4 SILVER BB-FADE in silver range (silver ADX<20): as R1 on XAGUSD.
+R5 GOLD 3-DAY EXTREME FADE in range: ADX<20, 3-day return < -1.5 ATR -> long, > +1.5 ATR -> short; exit 3 days or SMA10 cross; stop 2 ATR.
+R6 RISK TRANSFER: when gold ADX<20, existing MR sleeves (NAS IBS, SPX RSI2, DOW IBS, NAS RSI2, EURGBP MR) at W x1.5 (offline first).
+Gates: PF>=1.15, all of P1/P2/P3 > 0, PFx2>1, t>=2.0 (screen), >=8 trades/yr; mean R in the range regime > 0; portfolio
+(harness) better incl. the range-regime months and 2016-18. Controls: R1/R2 logic run on NAS100 (known MR market) must be positive.
+--- added after R1-R5 failed (before running R7-R8):
+R7 GOLD NIGHT DRIFT: long XAUUSD at 22:00 UTC (after the NY close), exit 06:00 UTC; R = return / (0.5 x daily ATR); every
+   weekday; also split by range regime. Literature: gold overnight returns positive, daytime negative.
+R8 INDEX OVERNIGHT: long SPX500 / NAS100 at 15:59 NY, exit 09:31 NY next session (Cliff-Cooper-Gulen 2008 overnight effect).
+--- added after R7/R8 (before running R9-R10):
+R9 INDEX TURN-OF-MONTH (Lakonishok-Smidt / Ariel): long SPX500, NAS100, US30 at the 15:59 NY close of the 2nd-last trading day
+   of the month, exit 15:59 NY on the 3rd trading day of the new month. R = return / (2 x daily ATR) (stop 2 ATR not modelled).
+R10 PRE-FOMC DRIFT (Lucca-Moench 2015): long SPX500 / NAS100 at 14:00 NY the day before the statement, exit 13:55 NY on the day.
