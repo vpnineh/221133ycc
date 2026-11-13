@@ -1,6 +1,6 @@
 # Agent toolkit provisioning
 
-Two SessionStart hooks provision every session opened on this repo. The
+One SessionStart hook provisions every session opened on this repo. The
 container is ephemeral and rebuilt each time, so both re-run on every start.
 They run in this order, which matters — see the `seo-audit` note below.
 
@@ -13,32 +13,31 @@ Both are idempotent. Measured: a warm session is ~7ms, a cold one 2m6s.
 
 | Source | Skills |
 | --- | --- |
-| `ibelick/ui-skills` | 7 |
+| `ibelick/ui-skills` | 42 |
 | `vercel-labs/agent-skills` | 9 |
 | `pbakaus/impeccable` | 1 |
 | `nextlevelbuilder/ui-ux-pro-max-skill` | 7 |
 | `upstash/context7` | 3 |
 | `anthropics/skills` (`frontend-design`) | 1 |
-| `coreyhaines31/marketingskills` | 50 |
-| `JuliusBrussee/caveman` | 17 |
-| `emilkowalski/skills` | 13 |
+| `coreyhaines31/marketingskills` | 52 |
+| `JuliusBrussee/caveman` | 20 |
+| `emilkowalski/skills` | 17 |
 | `aaron-he-zhu/aaron-marketing-skills` (seo-geo arm only) | 16 |
-| `AgriciDaniel/claude-seo` (v2.4.0) | 33 |
+| `AgriciDaniel/claude-seo` (v2.6.0) | 33 |
 | `Graphify-Labs/graphify` (PyPI `graphifyy`) | 1 |
 
 Global CLIs: `@playwright/cli`, `ruflo`, `graphify`.
 
-159 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
-routing guide add about 30 KB (~7,400 tokens) to the start of every session. Trim `BUNDLES` in
-`setup-skills.sh` if that budget matters more than the coverage.
-
+170 skills, listed with summaries in `SKILLS.md`. Their descriptions plus the
+routing guide add about 116 KB (~29,069 tokens) to the start of every session.
+Trim `BUNDLES` in `setup-skills.sh` if that budget matters more than the coverage.
 ## Two collisions the scripts resolve
 
 **`seo-audit`** — marketingskills and claude-seo both ship a skill with that
 exact name, and they land on the same path. Whichever installs last silently
 wins; marketingskills did, which cost us claude-seo's orchestrator. The skills
 hook now renames the marketing one to `marketing-seo-audit` and runs before the
-claude-seo hook, so both survive. Do not reorder the hooks.
+claude-seo, so both survive. claude-seo now runs last inside the same step; see below.
 
 The two are told apart by the `author: AgriciDaniel` metadata field, never by
 description text. The first version grepped for "subagent delegation"; claude-seo
@@ -107,11 +106,14 @@ Three things that never happen in a session break there, all now handled:
 
 ## Daily drift check
 
-`.github/workflows/skills-update.yml` runs at 04:17 UTC and opens one PR only
-when something changed.
+`.github/workflows/skills-update.yml` runs at 04:17 UTC daily and opens one PR
+only when something changed.
 
 Skills are not vendored, so they are never stale — every session installs them
-fresh. What the workflow catches is everything around them, via
+fresh. This is observable: upstream added `animation-performance`, `break-ui`,
+`choreograph`, `remove-animations` (emil), `link-building`, `conversion-tracking`
+(marketingskills) and others, and they appeared in sessions with no commit here.
+What the workflow maintains is everything around them, via
 `scripts/check-skill-drift.sh`:
 
 - the claude-seo version pin, which it bumps when upstream tags a release
@@ -123,6 +125,39 @@ fresh. What the workflow catches is everything around them, via
 The drift script's inventory check stops at the `## Account level` heading:
 those skills live at claude.ai, not in the container, so comparing them against
 installed directories reports them missing every time.
+
+### It needs one repo setting
+
+Settings → Actions → General → Workflow permissions → **Allow GitHub Actions to
+create and approve pull requests**. Without it the job does all its work, pushes
+the branch, and fails on the last step with `GitHub Actions is not permitted to
+create or approve pull requests`. That is what happened every day from late
+September until this was written, and nothing was delivered: the claude-seo pin
+stayed at an old pin while upstream moved on.
+
+The branch is a single fixed name, `skills/auto-update`, force-pushed each run.
+It used to be date-stamped, so every failing day left a new branch behind — 44 of
+them. With the setting off the job still fails, loudly, but names the setting and
+the compare link in the error and the step summary, and leaves one branch. With
+it on, an open PR is updated in place rather than duplicated.
+
+## One hook, run in order
+
+Both provisioning steps now live in `setup-skills.sh`: the bundles install first,
+then `setup-claude-seo.sh` runs last. They used to be two SessionStart hooks, and
+Claude Code runs a hook group's commands concurrently. That raced in two ways,
+measured in a fresh HOME: the bundle loop's before/after diff recorded
+claude-seo's 32 files as `ibelick/ui-skills`, and the `seo-audit` rename could run
+against a half-written claude-seo install. One ordered step has neither problem.
+
+## Updating
+
+Every session already reinstalls from upstream, so it always gets the latest
+release of each bundle. To refresh the container by hand:
+`npx skills update -g -y` updates what is installed; a clean rebuild
+(remove `~/.claude/skills` entries and `skills-provenance.tsv`, then run
+`setup-skills.sh`) also corrects provenance. The drift workflow handles the
+claude-seo pin and the upstream-retirement and collision checks.
 
 ## Session-start token cost
 

@@ -114,7 +114,7 @@ done
 cat > "${HOME}/.claude/CLAUDE.md" <<'ROUTING'
 # Skill routing
 
-Roughly 160 skills are installed here and several overlap. Pick by the shape of
+Many skills are installed here and several overlap. Pick by the shape of
 the task, not by keyword match on the skill name. When two fit, prefer the
 narrower one.
 
@@ -276,6 +276,16 @@ if command -v graphify >/dev/null 2>&1; then
         (cd "${CLAUDE_PROJECT_DIR}" && graphify update . >/dev/null 2>&1) || \
             log "WARN: graphify graph build failed"
     fi
+fi
+
+# claude-seo runs HERE, after every bundle, rather than as a second SessionStart
+# hook. Claude Code runs a hook group's commands concurrently, and the two raced:
+# the bundle loop's before/after diff recorded claude-seo's 32 files as
+# ibelick/ui-skills, and the seo-audit rename could run against a half-written
+# claude-seo install. One ordered step has neither problem.  # serialised-seo
+SEO_HOOK="$(dirname "${BASH_SOURCE[0]}")/setup-claude-seo.sh"
+if [ -f "${SEO_HOOK}" ]; then
+    bash "${SEO_HOOK}" || log "WARN: claude-seo install did not complete"
 fi
 
 # find|wc rather than ls|grep -c: grep -c exits 1 on a zero count, which

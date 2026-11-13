@@ -131,10 +131,14 @@ jobs:
             exit 0
           fi
 
-          branch="skills/auto-update-$(date -u +%Y%m%d)"
+          # One fixed branch, force-pushed every run. A date-stamped name made
+          # each day a new branch, and 44 piled up while PR creation was
+          # refused. Once PRs do open, it would also have meant a new PR every
+          # day carrying the same changes. This job owns the branch outright.
+          branch="skills/auto-update"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "${branch}"
+          git checkout -B "${branch}"
 
           title="Skills: daily update"
           [ "${PIN_BUMPED}" = "true" ] && title="Skills: claude-seo ${PIN_FROM} -> ${PIN_TO}"
@@ -162,7 +166,32 @@ jobs:
 
           git commit -q -m "${title}" \
             -m "Automated by .github/workflows/skills-update.yml. See the PR body for this run's drift report."
-          # --force: a same-day re-run reuses the branch name, and this job owns it.
           git push -q --force -u origin "${branch}"
-          gh pr create --head "${branch}" --title "${title}" --body-file pr-body.md \
-            || gh pr edit "${branch}" --title "${title}" --body-file pr-body.md
+
+          # An open PR means yesterday's changes are still unreviewed: bring it
+          # up to date rather than opening a second one.
+          existing=$(gh pr list --head "${branch}" --state open --json number --jq '.[0].number // empty')
+          if [ -n "${existing}" ]; then
+            gh pr edit "${existing}" --title "${title}" --body-file pr-body.md
+            echo "Updated PR #${existing}."
+            exit 0
+          fi
+
+          if ! out=$(gh pr create --head "${branch}" --title "${title}" --body-file pr-body.md 2>&1); then
+            echo "${out}"
+            # Stays red on purpose: the changes are real and nobody has seen
+            # them. But say exactly what to do instead of a bare exit code.
+            if grep -q 'not permitted to create or approve pull requests' <<<"${out}"; then
+              compare="https://github.com/${GITHUB_REPOSITORY}/compare/${branch}?expand=1"
+              echo "::error title=Actions cannot open PRs in this repo::Branch ${branch} is pushed with the changes. Enable Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests, or open the PR by hand: ${compare}"
+              {
+                echo '## PR not opened'
+                echo
+                echo "Branch \`${branch}\` is pushed with the changes. Open it: ${compare}"
+                echo
+                echo 'To make this automatic: Settings → Actions → General → Workflow permissions → *Allow GitHub Actions to create and approve pull requests*.'
+              } >> "${GITHUB_STEP_SUMMARY}"
+            fi
+            exit 1
+          fi
+          echo "${out}"
