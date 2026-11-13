@@ -1,6 +1,6 @@
 #include "sim.h"
 //+------------------------------------------------------------------+
-//| DonchianProp Portfolio v13.13 — multi-strategy, regime-aware EA   |
+//| DonchianProp Portfolio v13.14 — multi-strategy, regime-aware EA   |
 //| built for prop challenges (FundedNext Stellar 2-Step rules).     |
 //|                                                                  |
 //| 18 active sleeves on XAUUSD, XAGUSD, US30, NAS100, SPX500,       |
@@ -23,6 +23,29 @@
 //|   JPY LOTTERY  60h breakout, 10 ATR target                       |
 //|   EURGBP MR  50-day z-score reversion; stale exit after 72h      |
 //|                                                                  |
+//| v13.14 (Nov 2026) - research release: DEFAULT TRADING IDENTICAL  |
+//|  to v13.13 (10y funded deals match 1:1). Four new inputs, all OFF,|
+//|  each tested and pre-registered (dp/prereg/PREREG_v13.14.txt):    |
+//|  - InpUseNasTrendChallenge: NAS100 Donchian-55 H4 long above the  |
+//|    daily EMA200, phase 1 and 2 only. 39 starts 2016-25 (100k):    |
+//|    P(funded <= 60 days) 11% -> 27% (x2 costs 9% -> 25%), median   |
+//|    93 -> 87 days, BUT pass per attempt 77% -> 67% (x2 72 -> 56%): |
+//|    more challenge fees per funded account. Option for speed.      |
+//|  - InpLotDither (1/2): small-account lot dithering. 10k funded    |
+//|    2024-26 2.24 -> 3.17 %/month (25k 2.99, 100k 3.11) but worst   |
+//|    day -4.08% and 10y gain only +6%, worst month -9.3%. Rejected  |
+//|    as default; the min-lot limit (0.01 gold / index) is physical. |
+//|  - InpDayTrimPct / InpFundedRoomExp (+ higher funded risk): best  |
+//|    cell RF 1.5 + room + trim 2.5%: fresh funded 2.12 -> 2.37 %/mo |
+//|    (+12%) but P(losing year) 1.3% -> 5.3%. Rejected as default.   |
+//|  Also screened and rejected: 4 scalping families x 9 symbols      |
+//|  (shock fade / continuation, round-number fade / breakout): every |
+//|  cell negative after FundedNext costs, and gross edge ~0; a round |
+//|  trip costs 10% (NAS) to 64% (EURGBP) of a median 15-min range.   |
+//|  Measured limits (harness, CALR): 32 of 130 months negative at    |
+//|  2.27 %/month (std 3.62); challenge median 93-95 days at 10k, 25k |
+//|  and 100k; funded return bound by the daily tail (open-profit     |
+//|  giveback of gold / silver trends), not by the mean.              |
 //| v13.13 (Nov 2026) - payout-realistic funded research + 3 changes |
 //|  Research: ~330 full runs + 60 offline sleeve screens, every rule |
 //|  pre-registered; new unseen data 2010-06..2015-12 (never used    |
@@ -428,6 +451,7 @@ double InpDayTrimPct           = 0.0;    // v13.14 graded daily guard: when toda
 double InpDayTrimFrac          = 0.5;    // v13.14: fraction closed by the day trim (a minimum-lot position is closed fully)
 double InpFundedRoomExp        = 0.0;    // v13.14 funded: risk x clamp(room^e, InpFundedRoomMin, 1), room = distance of min(balance, equity) to the max-loss floor in units of the max loss (0 = off)
 double InpFundedRoomMin        = 0.2;    // v13.14 funded: lower clamp of the room multiplier
+bool   InpUseNasTrendChallenge = false;  // v13.14 (option, off): NAS100 Donchian-55 H4 long above the daily EMA200 in phase 1 and 2 only (slot of SILV H4-55). 39 starts: P(funded <= 60 days) 11% -> 27%, median 93 -> 87 days, but pass per attempt 77% -> 67% (more retries)
 
 
 long   InpMagicBase            = 110000; // مجیک پایه (هر استراتژی = پایه + شماره)
@@ -2110,6 +2134,7 @@ void TryEnter(const int k, const int dir, const double dist_override, const doub
    string sym = g_sym[role], why;
    if(!EntryAllowed(why)) { g_ss[k].status = why; return; }
    if(SL_SIDE[k] == 1 && dir < 0) return;
+   if(k == 11 && InpUseNasTrendChallenge && g_preset != PRESET_PHASE1 && g_preset != PRESET_PHASE2) { g_ss[k].status = "challenge only"; return; }
    if(!RegimeAllows(k, dir)) { g_ss[k].status = (g_vf_hit ? "vol filter" : "regime"); return; }
    if(SL_WKD[k] > 0 && WeekendZone()) { g_ss[k].status = "weekend"; return; }
    DayFeat f = g_df[role];
@@ -4842,6 +4867,7 @@ int InitCore()
    flags[0] = InpUseGoldT60; flags[1] = InpUseGoldT240; flags[2] = InpUseGoldMOM; flags[3] = InpUseGoldTOM;
    flags[4] = InpUseSilverT240; flags[5] = InpUseSilverMA; flags[6] = InpUseDowRSI2; flags[7] = InpUseDowIBS;
    flags[8] = InpUseNasRSI2; flags[9] = InpUseNasIBS; flags[10] = InpUseAudJpyBB; flags[11] = InpUseSilverH4; flags[12] = InpUseUsdJpyGotobi; flags[13] = InpUseNas3FPS; flags[14] = InpUseUsdJpyFixRev; flags[15] = InpUseGoldLottery; flags[16] = InpUseNasLottery; flags[17] = InpUseJpyLottery; flags[18] = InpUseEurGbpMR; flags[19] = InpUseNasGapLong; flags[20] = InpUseGoldIbs; flags[21] = InpUseSpxRSI2;
+   if(InpUseNasTrendChallenge && !InpUseSilverH4) { SL_ROLE[11] = 3; SL_REG[11] = 2; SL_W[11] = 1.0; SL_NAME[11] = "NAS H4-55"; flags[11] = true; }   // v13.14 option
    flags[22] = InpUseFedPostUs30; flags[23] = InpUseFedPostSpx; flags[24] = InpUseDxyJpy; flags[25] = InpUseGoldZcont;   // v13.4 (v15.0 review)
    for(int k = 0; k < NSLV; k++) { g_use[k] = flags[k] && g_sym_ok[SL_ROLE[k]]; g_ss[k].dir = 0; g_ss[k].status = ""; g_close_retry[k] = false;
                                    g_cl_wait[k] = false; g_pt_pend[k] = 0; g_ad_pend[k] = 0; g_st_pend[k] = 0; g_rt_dir[k] = 0; }

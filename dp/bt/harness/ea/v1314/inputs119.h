@@ -53,3 +53,4 @@ if(getenv("MAXLOSS")) InpMaxLossPct=atof(getenv("MAXLOSS"));
 { const char*v; if((v=getenv("TP1"))) InpTurboRiskPhase1=atof(v); if((v=getenv("TRS"))) InpTurboRampStartPct=atof(v); if((v=getenv("TP2"))) InpTurboRiskPhase2=atof(v);
   if((v=getenv("TSOFT"))) InpTurboSoftDailyStopPct=atof(v); if((v=getenv("TDDB"))) InpTurboDDBrakePct=atof(v); if((v=getenv("TCUSH"))) InpTurboCushionMin=atof(v); if((v=getenv("GCAPF"))) InpGoldDirCapFundedR=atof(v); }
 { const char*v; if((v=getenv("TRIM"))) InpDayTrimPct=atof(v); if((v=getenv("TRIMF"))) InpDayTrimFrac=atof(v); if((v=getenv("FRE"))) InpFundedRoomExp=atof(v); if((v=getenv("FRM"))) InpFundedRoomMin=atof(v); }
+{ const char*v; if((v=getenv("NTC"))) InpUseNasTrendChallenge=atoi(v); }

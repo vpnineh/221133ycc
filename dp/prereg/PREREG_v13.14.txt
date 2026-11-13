@@ -92,3 +92,10 @@ SC4 ROUND-NUMBER BREAKOUT (Osler 2005 stop-loss cascades; registered after SC3's
   NH: NAS100 trend sleeve in the challenge (slot 11 = Donchian-55 H4 long, moved to NAS100: OVR ROLE.11=3, REG.11=2 (close > EMA200),
   W.11=1.0; SLV mask = default + slot 11). Bundle evidence: NAS T240 PF 1.82 (94 trades) passed alone, rejected for funded DD only.
   Accept as a challenge-only sleeve if at x1 AND x2: P(funded <= 60 d) and median days both better by >= 10% relative and J not worse.
+--- CH RESULTS (39 starts, abandon -6%):
+  size: v13.13 10k median 94 d, P(<=60 d) 16.3%, pass/attempt 77%; 25k 95 d, 16.2%, 74%; 100k 93 d, 10.8%, 77%.
+  NH x1: median 93 -> 87 (-6.5%), P(<=60 d) 10.8 -> 26.9%, pass/attempt 77 -> 67%, J 155 -> 160.
+  NH x2: median 138 -> 114 (-17%), P(<=60 d) 8.5 -> 25.1%, pass/attempt 72 -> 56%, J 188 -> 204.
+  Verdict: FAILS the registered rule (x1 median < 10% better; J worse at x1 and x2). Not a default. Shipped as an OFF option
+  (InpUseNasTrendChallenge) because it is the only tested lever that moves P(funded <= 60 d) materially (about x2.5), at the cost
+  of more attempts (fees) per funded account.
