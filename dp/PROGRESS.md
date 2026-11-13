@@ -24,3 +24,9 @@ Recovery: `sh dp/setup.sh` (downloads HistData + Dropbox US30, builds bins and h
   worst month -7.2 -> -5.3, DD 8.0 -> 7.0, mean -0.05.
 ## Experiments (budget ~40 configs)
 - S2 lot dithering for small accounts: REJECTED (see prereg/PREREG_v13.14.txt). ~12 configs used.
+- S2b lot dithering (fixed one-draw-per-signal): REJECTED (10k 2024-26 2.24 -> 3.17 but worst day -4.08; 10y +6% only, worst month -9.3).
+- T-series graded daily trim + funded room scaler + higher funded risk: REJECTED (best P1 +12% on fresh funded, P(year<0) 1.3 -> 5.3%).
+- SC-series scalping (shock fade, shock continuation, round-number fade, round-number breakout) x 9 symbols: all FAIL, also gross.
+  FundedNext round trip = 10% (NAS) .. 64% (EURGBP) of the median 15-min range.
+- Challenge: P(funded <= 60 d) = 10.8% (100k). Running: 10k/25k challenge baselines, NH (NAS H4-55 trend, challenge-only).
+- v1314 = v1313 + inputs off by default (InpLotDither, InpDayTrimPct, InpFundedRoomExp); defaults deal-for-deal identical to v13.13.

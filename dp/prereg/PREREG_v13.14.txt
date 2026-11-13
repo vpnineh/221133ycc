@@ -22,3 +22,73 @@ S2 SMALL-ACCOUNT LOT DITHERING. Problem measured (funded 2024-01..2026-10, month
   DITH=2 MAXRT=1.5 2.23, -9.45, 33 neg. Gain is a 2024-26 effect only (+4..7% relative over 10y, < +15%) and the monthly tail doubles
   (dithered min-lot trades are 1.5-2x the planned risk). Worst days at 10k = metals open-profit giveback (2025-10-17), same as F.
   Conclusion: 10k = 25k parity is not reachable by sizing tricks with 0.01-lot gold/silver/index contracts at 2025-26 prices.
+--- S2 CORRECTION (advisor check, before rerun): the implementation advanced the carry on every TryEnter call; a skipped signal was
+  re-evaluated on the next bar and entered (log: GOLD MOM skip then entry at the same price) -> the registered rule did not run.
+  Fix S2b: one draw per signal. After a dither skip of sleeve k / direction d, further calls for (k,d) within 24 h are skipped without
+  advancing the carry. Same gates as S2. One rerun (2024-26 10k/25k/100k + 10y 10k); the S2 numbers above are void.
+--- S2b RESULT: REJECTED (registered gates). 2024-26 payouts: 10k 2.24 -> 3.17 %/mo but worst day -4.08 (< -3.9), min eq -4.72;
+  25k 2.99 -> 2.98 (min eq -6.26); 100k 3.11 -> 3.22 (not identical). 10y 10k: 2.08 -> 2.20 %/mo (+6%, < +15%), worst month
+  -5.08 -> -9.31 (2022-01), neg months 32 -> 34. 183 dithered entries / 118 dither skips at 10k 2024-26.
+  Wording: 10k parity is not reached by this rule (the 2024-26 gain is real but the 10y gain is small and the tail doubles).
+
+=== T-series: GRADED DAILY TRIM + HIGHER FUNDED RISK (registered 2026-11-13 before any run).
+  Motivation: funded return is bound by the daily tail, not by the mean. v13.13 L-series "Lb" (funded 2.0 with room^2) made 2.91 %/mo
+  with 0/39 dead but worst day -4.58 (108 account-days <= -4%); the tail is intraday giveback of open profit (our worst-day table:
+  2020-12-21 low -3.84 close -1.28; 2025-10-17 metals). The old LOCK bounded the worst case (all stops from now) and fired constantly.
+  Rule T (new input InpDayTrimPct, 0 = off; InpDayTrimFrac 0.5): once per server day, when today's loss (vs the day reference) reaches
+  InpDayTrimPct % of the initial balance, close InpDayTrimFrac of EVERY open sleeve position (lot-step floor; a min-lot position is
+  closed fully) and block new entries for the rest of the day. The 4% guard is unchanged.
+  Cells (funded, CALR): RF 1.0 / 1.5 / 2.0 x trim off / 3.0%. Primary candidate: RF 1.5 + trim 3.0. Neighbours: trim 2.5 / 3.5.
+  Evaluation: (1) 39 fresh funded x 24 months, monthly payout (the real case): mean %/mo, dead accounts (eq <= -9% or a day <= -5%),
+  worst day, account-days <= -4%; (2) 10y 100k fixed risk: %/mo, worst day, monthly neg count, worst month; (3) x2 costs; (4) LH.
+  Accept only if ALL: fresh funded %/mo >= +15% vs F (2.12) at x1 AND better at x2; dead accounts not more than F (0) at x1 and x2;
+  worst day >= -3.9% and no day <= -4% in fresh funded at x1 (x2 reported); 10y worst day >= -3.9%; LH %/mo higher, worst day >= -3.9%.
+  Among passing cells the lowest risk within 5% of the best x2 income.
+--- T AMENDMENT (advisor review, before any harness run): the plain-RF cells fail on numbers we already have (fresh funded min equity
+  -8.4% at RF 1.0; worst-day table scaled to RF 1.5 gives three days <= -4%). Offline pricing (tools3/toff.py: 39 fresh funded payout
+  runs at RF 1.0 scaled linearly, trim and 4% guard modelled; optimistic, so offline FAIL is decisive, PASS is not):
+  F 2.04/0 dead/-3.39; RF1.25 8 dead; RF1.5 21 dead; RF1.5 trim2.5 18 dead; Lb(RF2,e2) 0 dead but 160 days <= -4%;
+  RF1.5 room e=1 trim2.5: 2.61 %/mo, 0 dead, wDay -3.79, 0 days <= -4, minEq 92.2; RF1.5 e1 trim2: 2.62/0/-3.54/0;
+  RF1.5 e1 trim3: 8 days <= -4 (fails); RF2 e1 trim2.5: 3.21 but 61 days <= -4 (fails).
+  Amended cells (harness): every cell above RF 1.0 carries the room scaler (risk = RF x clamp(room^e, 0.2, 1), room = (min(bal,eq) -
+  floor)/(10% of initial), floor = initial - 10%; e = 1). PRIMARY P1 = RF 1.5, e 1, trim 2.5 (frac 0.5). Neighbours: trim 2.0; trim 3.0
+  (expected to fail); RF 1.75 + trim 2.5. Gates unchanged. Trim off + room off must be deal-for-deal identical to v13.13 (100k 10y).
+
+=== SC-series: SCALPING SLEEVES (user request 13 Nov: "several professional scalping sleeves with a real edge, profitable in all regimes").
+  Registered before any result. Prior evidence (bundle): gold scalping 31 configs dead; index intraday momentum gross t=4.4 but costs
+  eat it (1.4 round trips/day); gold session drift gross t=5.6, after cost PF 0.94; ORB/VWAP dead. So only rules whose edge per trade
+  is large against the spread are screened, and costs are the FundedNext CALR table (spread + commission, +0.5 x spread slippage on
+  market entries and stop exits; TP = limit, no slippage). Bars: HistData M1 bid; ask = bid + spread. Same-bar SL/TP: SL first.
+  Universe: XAUUSD XAGUSD NAS100 SPX500 USDJPY AUDJPY EURGBP GBPUSD (US30 2017+ only, reported).
+  SC1 SHOCK FADE (liquidity provision; Grossman-Miller): 5-minute return (M1 close-to-close over 5 bars) with |r5| >= K x sigma5,
+     sigma5 = std of 5-min returns over the previous 20 trading days (same symbol, all hours); K = 4 (neighbour 3, 5). Enter against
+     the move at the next M1 open; TP = 50% retracement of the 5-min move; SL = 1.0 x the move beyond the entry; time exit 60 min.
+     One position per symbol; no entry in the 2 minutes after a 5-min boundary of a US data hour is NOT used (no calendar).
+  SC2 SHOCK CONTINUATION: same trigger, trade with the move: TP = 1.0 x move, SL = 0.5 x move, time exit 60 min.
+  SC3 ROUND-NUMBER FADE (Osler 2003, take-profit clustering): first touch in the server day of a round level (USDJPY/AUDJPY x.00
+     and x.50, EURGBP/GBPUSD x.x000 and x.x500 (50 pip grid), XAUUSD multiples of 10, XAGUSD 0.50, NAS100 100, SPX500 25) after the
+     price was >= 0.5 x ATR15 (15-min ATR, 20-day) away from it within the last 60 minutes; limit order AT the level (fade), TP =
+     0.5 x ATR15 from the level, SL = 0.5 x ATR15 beyond, time exit 30 min. Fill only if the M1 bar trades through the level.
+  Gates per symbol x rule (as the bundle): PF >= 1.15 at x1, PF > 1 at x2 costs, t >= 2.5 (trade R, day-clustered), P1 2016-18 /
+     P2 2019-22 / P3 2023-26 each > 0, >= 8 trades/yr, and LH 2010-15 (separate data) not negative. A pass goes to the harness
+     (portfolio, x2, LH, challenge) under the standing acceptance rule. Everything is reported, passes and fails.
+--- T RESULT: REJECTED (no cell meets +15% on fresh funded). 39 fresh funded x 24 mo, monthly payout, x1:
+  F 2.12 %/mo, worst day -3.58, 0 days <= -4%, worst account 0.70, P(year<0) 1.3%
+  P1 RF1.5 room e1 trim2.5: 2.37 (+12%), -3.82, 0, worst acct 0.41, P(year<0) 5.3%  (10y 100k: 2.84 vs 2.28, wDay -3.76, 38 neg months vs 32)
+  P2 RF1.75 trim2.5: 2.33, -4.17, 10 days <= -4% (fails); P3 RF1.5 trim2.0: 2.08 (worse).  x2/LH not run (primary failed).
+  Funded-return line closed: the daily tail and the max-loss floor bind before the mean; more risk buys < 15% more income.
+--- SC1/SC2/SC3 RESULT: FAIL on every symbol (x1 PF 0.24-0.81, every period negative, LH negative). Gross (zero cost): SC1 PF
+  XAU 1.06 / NAS 0.98 / USDJPY 1.01 (no edge); SC3 gross meanR -0.16..-0.24 (adverse selection of the round-number limit).
+SC4 ROUND-NUMBER BREAKOUT (Osler 2005 stop-loss cascades; registered after SC3's gross result, so its direction was SEEN -> holdout LH
+  decides): same level / first-touch / approach conditions as SC3 but a STOP order with the move at the level + 0.1 x ATR15 (buy above
+  U when price approaches U from below; sell below L from above), market fill + slippage; TP 0.5 x ATR15, SL 0.5 x ATR15, time 30 min.
+  Same gates. Pass requires LH 2010-15 > 0 and t >= 2.5 there as well (stricter, since the direction was seen).
+--- SC4 RESULT: FAIL on every symbol (PF 0.20-0.58, every period and LH negative). Both directions at round numbers lose ~0.5R:
+  with 0.5 x ATR15 stops the FundedNext round-trip cost is a large part of the stop (see notes/scalp cost table). SC-series closed:
+  no scalping sleeve passes; none is added.
+
+=== CH-series: CHALLENGE SPEED (registered before the runs). Baseline chF (100k, 39 starts, abandon -6%): median 93 d to funded,
+  P(funded <= 60 d) 10.8%, pass/attempt 77%, J 155. User goal: < 60 days.
+  NH: NAS100 trend sleeve in the challenge (slot 11 = Donchian-55 H4 long, moved to NAS100: OVR ROLE.11=3, REG.11=2 (close > EMA200),
+  W.11=1.0; SLV mask = default + slot 11). Bundle evidence: NAS T240 PF 1.82 (94 trades) passed alone, rejected for funded DD only.
+  Accept as a challenge-only sleeve if at x1 AND x2: P(funded <= 60 d) and median days both better by >= 10% relative and J not worse.

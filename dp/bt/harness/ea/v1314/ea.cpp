@@ -424,6 +424,10 @@ int  InpFixRevStopPips = 40;   // برگشت فیکس: حد ضرر (پیپ)
 double InpGoldVolFilter        = 0.70;   // v13.13 فیلتر نوسان طلا: ورود جدید GOLD T60 / T240 / MOM ممنوع وقتی رتبه‌ی نوسان ۲۰روزه‌ی طلا در ۲۵۰ روز اخیر به این مقدار برسد (۰ = خاموش). معامله‌های حذف‌شده در ۲۰۱۶–۲۶ و در داده‌ی دیده‌نشده‌ی ۲۰۱۰–۱۵ هر دو میانگین −۰٫۰۵R داشتند
 int    InpLotDither            = 0;      // v13.14 small accounts: deterministic lot dithering (0 off, 1 only refused min-lot signals, 2 every lot below InpLotDitherSteps steps) - expected exposure = planned exposure
 double InpLotDitherSteps       = 5;      // v13.14: dithering applies only when the exact lot is below this many volume steps (big accounts unchanged)
+double InpDayTrimPct           = 0.0;    // v13.14 graded daily guard: when today's loss reaches this % of the initial balance, close InpDayTrimFrac of every position once and stop new entries for the day (0 = off)
+double InpDayTrimFrac          = 0.5;    // v13.14: fraction closed by the day trim (a minimum-lot position is closed fully)
+double InpFundedRoomExp        = 0.0;    // v13.14 funded: risk x clamp(room^e, InpFundedRoomMin, 1), room = distance of min(balance, equity) to the max-loss floor in units of the max loss (0 = off)
+double InpFundedRoomMin        = 0.2;    // v13.14 funded: lower clamp of the room multiplier
 
 
 long   InpMagicBase            = 110000; // مجیک پایه (هر استراتژی = پایه + شماره)
@@ -723,6 +727,7 @@ double DailyLimitMoney(const double pct);
 double HardDailyPct();
 double LossFloor(const double pct);
 double GuardFloor();
+void DayTrim();
 bool EntryAllowed(string &why);
 void LotNote(const string n);
 double LotsFor(const string sym, const double risk_money, const double dist, string &why, const int dir = 1);
@@ -938,6 +943,12 @@ double BaseRiskPct()
    if(g_preset == PRESET_FUNDED)
    {
       double rf = fast ? InpFastRiskFunded : InpRiskFunded;
+      if(InpFundedRoomExp > 0 && g_init_bal > 0 && InpMaxLossPct > 0)     // v13.14: less risk as the max-loss floor gets closer
+      {
+         double ml = InpMaxLossPct / 100.0 * g_init_bal;
+         double room = (MathMin(AccountInfoDouble(ACCOUNT_BALANCE), AccountInfoDouble(ACCOUNT_EQUITY)) - (g_init_bal - ml)) / ml;
+         rf *= MathMax(InpFundedRoomMin, MathMin(1.0, MathPow(MathMax(room, 0.0), InpFundedRoomExp)));
+      }
       if(InpFundedRampStartPct > 0 && g_init_bal > 0 && AccountInfoDouble(ACCOUNT_EQUITY) < g_init_bal * (1.0 + InpFundedRampAtPct / 100.0))
          return MathMin(InpFundedRampStartPct, rf);       // no cushion yet: reduced risk
       return rf;
@@ -1856,6 +1867,47 @@ double GuardFloor()
    if(IsPersonal()) return (InpPersMaxDDPct > 0 && g_pers_peak > 0 ? g_pers_peak * (1.0 - InpPersMaxDDPct / 100.0) : 0);
    return LossFloor(InpMaxLossPct - InpSafetyBufferPct);
 }
+// v13.14 graded daily guard: once per server day, at InpDayTrimPct of the initial balance lost today, InpDayTrimFrac of every
+// sleeve position is closed (a position too small to split is closed fully) and new entries stop for the day. Closed markets: retried.
+datetime g_trim_day = 0; bool g_trim_pend = false; bool g_trim_done[NSLV];
+void DayTrim()
+{
+   if(InpDayTrimPct <= 0 || g_halt != 0) return;
+   if(g_trim_day != g_day)
+   {
+      if(DailyLoss() < DailyLimitMoney(InpDayTrimPct)) return;
+      g_trim_day = g_day; GvSet("trimday", (double)g_trim_day); g_trim_pend = true;
+      for(int q = 0; q < NSLV; q++) g_trim_done[q] = false;
+      PrintFormat("v13.14 DAY TRIM: today's loss %.2f reached %.2f%% of the initial balance - %.0f%% of every position closed, no new entries today",
+                  DailyLoss(), InpDayTrimPct, InpDayTrimFrac * 100.0);
+   }
+   if(!g_trim_pend) return;
+   bool left = false;
+   for(int k = 0; k < NSLV; k++)
+   {
+      if(g_trim_done[k]) continue;
+      double l0, p0;
+      if(SleevePositions(k, l0, p0) <= 0) { g_trim_done[k] = true; continue; }
+      int role = SL_ROLE[k];
+      if(!MarketOpen(role)) { left = true; continue; }
+      string sym = g_sym[role];
+      double vst = SymbolInfoDouble(sym, SYMBOL_VOLUME_STEP), vmin = SymbolInfoDouble(sym, SYMBOL_VOLUME_MIN);
+      bool whole = false;
+      for(int i = PositionsTotal() - 1; i >= 0; i--)
+      {
+         ulong t = PositionGetTicket(i);
+         if(t == 0 || PositionGetInteger(POSITION_MAGIC) != SleeveMagic(k)) continue;
+         double v = PositionGetDouble(POSITION_VOLUME);
+         double cv = MathFloor(v * InpDayTrimFrac / vst + 1e-9) * vst;
+         if(cv < vmin - 1e-9 || v - cv < vmin - 1e-9) { whole = true; continue; }
+         g_trade.SetTypeFillingBySymbol(sym);
+         g_trade.PositionClosePartial(t, cv);
+      }
+      if(whole) CloseSleeve(k, "day trim");
+      g_trim_done[k] = true;
+   }
+   if(!left) g_trim_pend = false;
+}
 bool EntryAllowed(string &why)
 {
    why = "";
@@ -1863,12 +1915,13 @@ bool EntryAllowed(string &why)
    if(g_halt != 0) { why = "halt"; return false; }
    if(g_target_hit) { why = "target"; return false; }
    if(DailyLoss() >= DailyLimitMoney(SoftStopPct())) { why = "soft stop"; return false; }
+   if(InpDayTrimPct > 0 && g_trim_day == g_day) { why = "day trim"; return false; }
    if(NewsBlocked()) { why = "news"; return false; }
    if(!TerminalInfoInteger(TERMINAL_TRADE_ALLOWED) || !MQLInfoInteger(MQL_TRADE_ALLOWED)) { why = "algo off"; return false; }
    return true;
 }
 
-int g_lotk = -1; double g_dith[NSLV];             // v13.14 lot dithering carry per sleeve
+int g_lotk = -1, g_lotd = 0; double g_dith[NSLV]; datetime g_dith_t[NSLV]; int g_dith_dir[NSLV];             // v13.14 lot dithering carry per sleeve
 
 void LotNote(const string n) { if(StringFind(g_lot_note, n) < 0) g_lot_note += (g_lot_note == "" ? "" : ", ") + n; }
 double LotsFor(const string sym, const double risk_money, const double dist, string &why, const int dir)
@@ -1888,8 +1941,9 @@ double LotsFor(const string sym, const double risk_money, const double dist, str
          if(minrisk > cap) { why = "min-lot risk"; return 0; }
          if(InpLotDither == 2 || (InpMinLotOverRisk > 0 && minrisk > InpMinLotOverRisk * risk_money))
          {
+            if(g_dith_dir[g_lotk] == g_lotd && TimeCurrent() - g_dith_t[g_lotk] < 86400) { why = "min-lot dither"; return 0; }   // same signal: one draw only
             g_dith[g_lotk] += exact / vmin; GvSet("dith" + IntegerToString(g_lotk), g_dith[g_lotk]);
-            if(g_dith[g_lotk] < 1.0 - 1e-9) { why = "min-lot dither"; return 0; }
+            if(g_dith[g_lotk] < 1.0 - 1e-9) { g_dith_t[g_lotk] = TimeCurrent(); g_dith_dir[g_lotk] = g_lotd; why = "min-lot dither"; return 0; }
             g_dith[g_lotk] -= 1.0; GvSet("dith" + IntegerToString(g_lotk), g_dith[g_lotk]);
             LotNote("min-lot dithering"); return vmin;
          }
@@ -2066,7 +2120,7 @@ void TryEnter(const int k, const int dir, const double dist_override, const doub
    double dist = (dist_override > 0 ? dist_override : (SL_KIND[k] == 11 ? SL_SLK[k] * f.sd50 * f.close : SL_SLK[k] * f.atr));
    double risk_money = RiskUnitPct() / 100.0 * SL_W[k] * g_init_bal * GoldRegimeMult(k);
    g_lot_note = "";
-   g_lotk = k; double lots = LotsFor(sym, risk_money, dist, why, dir); g_lotk = -1;
+   g_lotk = k; g_lotd = dir; double lots = LotsFor(sym, risk_money, dist, why, dir); g_lotk = -1;
    if(lots <= 0) { g_ss[k].status = why; LogSkip(k, dir, StringFormat("%s (needs %.2f lot min, risk %.0f planned)", why, SymbolInfoDouble(sym, SYMBOL_VOLUME_MIN), risk_money)); return; }
    double tpd = (tp_override > 0 ? tp_override : SL_TPK[k] * f.atr);
    g_last_rc = 0;
@@ -3663,6 +3717,7 @@ void PropChecks()
       g_stage_halts++;
       g_msg = "DAILY LOSS GUARD"; Print("v13 HALT (today): daily-loss guard");
    }
+   DayTrim();                                             // v13.14 graded daily guard
    // v13.1: open-profit protection (checked once a minute)
    static datetime s_lw = 0;
    if(InpLockOpenProfit && g_halt == 0 && (now - s_lw >= 60 || (g_lw_wait != 0 && LockWaitOpen())))   // v13.3: or a skipped symbol reopened
@@ -4818,6 +4873,7 @@ int InitCore()
    GvSet("inp_preset", (double)InpPreset); GvSet("preset", g_preset); GvSet("login", login);
    g_p1_ramp_done = (restore && GvGet("p1ramp", 0) > 0.5);
    g_paused = (GvGet("paused", 0) > 0.5);
+   g_trim_day = (datetime)GvGet("trimday", 0);
    for(int dk = 0; dk < NSLV; dk++) g_dith[dk] = GvGet("dith" + IntegerToString(dk), 0);   // v13.14 dithering carry survives restarts
    g_halt = (int)GvGet("halt", 0);
    g_day = (datetime)GvGet("day", 0); g_day_ref = GvGet("dayref", 0);
