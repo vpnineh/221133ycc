@@ -30,10 +30,23 @@ BUNDLES=(
   "copywriting|coreyhaines31/marketingskills|"
   "caveman-explore|JuliusBrussee/caveman|"
   "animate|emilkowalski/skills|"
-  # Only the seo-geo arm of aaron-marketing-skills. The bundle also carries 104
-  # ad/email/influencer/launch/narrative/social skills that duplicate
-  # marketingskills, so they are left out.
-  "serp-markup-builder|aaron-he-zhu/aaron-marketing-skills|-s domain-authority-auditor -s offsite-signal-analyzer -s performance-monitor -s rank-tracker -s content-writer -s geo-content-optimizer -s page-play-builder -s serp-markup-builder -s competitor-analysis -s content-gap-analysis -s keyword-research -s serp-analysis -s content-quality-auditor -s on-page-seo-checker -s site-structure-optimizer -s technical-seo-checker"
+)
+
+# Removed on purpose, and kept out by the prune step below. aaron-marketing-skills
+# (seo-geo arm, 16 skills, ~5.7k tokens per session) duplicated claude-seo's
+# analysis for this environment, which cannot crawl anyway. Caveman's cloud and
+# gateway skills (~7 of its 20) need a service this environment does not have,
+# and its mode variants are reached by explicit command only.
+PRUNED=(
+  "caveman-discover" "caveman-evidence-review" "caveman-learn" "caveman-manage"
+  "caveman-optimize" "caveman-setup" "caveman-stats" "megacave" "ultracave"
+  "caveman-compress"
+  # aaron-marketing-skills seo-geo arm: installed by an earlier version, pruned now
+  "domain-authority-auditor" "offsite-signal-analyzer" "performance-monitor"
+  "rank-tracker" "content-writer" "geo-content-optimizer" "page-play-builder"
+  "serp-markup-builder" "competitor-analysis" "content-gap-analysis" "keyword-research"
+  "serp-analysis" "content-quality-auditor" "on-page-seo-checker"
+  "site-structure-optimizer" "technical-seo-checker"
 )
 
 # Which bundle each skill came from, so list-skills.sh can group the inventory
@@ -93,7 +106,7 @@ fi
 # caveman's core `caveman` and `caveman-review` are already uploaded as
 # account-level skills, which reach every chat rather than just Claude Code
 # sessions. Drop the local copies so the same trigger does not fire twice.
-for dup in caveman caveman-review; do
+for dup in caveman caveman-review "${PRUNED[@]}"; do
     rm -rf "${SKILLS_DIR:?}/${dup}"
     sed -i "/^${dup}\t/d" "${PROV}" 2>/dev/null || true
 done
@@ -189,32 +202,20 @@ component libraries; `prototype` builds a throwaway to feel an idea out.
 `marketing-seo-audit` (renamed to avoid clobbering claude-seo's `seo-audit`),
 `schema`, `ai-seo`, `programmatic-seo`, `site-architecture`.
 
-**aaron-marketing-skills seo-geo** is a third set: deep prose playbooks with no
-tooling, named without the `seo-` prefix — `keyword-research`, `serp-analysis`,
-`competitor-analysis`, `content-gap-analysis`, `rank-tracker`,
-`performance-monitor`, `technical-seo-checker`, `on-page-seo-checker`,
-`content-quality-auditor`, `domain-authority-auditor`, `offsite-signal-analyzer`,
-`site-structure-optimizer`, `serp-markup-builder`, `geo-content-optimizer`,
-`content-writer`, `page-play-builder`. Each carries scoring rubrics and typed
-checklists, and works from exports or data you paste rather than crawling.
+Which of the two:
 
-Which of the three:
-
-- claude-seo when it can crawl the site itself
-- **aaron seo-geo when it cannot** — that is the usual case in this
-  environment, see below — or when the user has GSC/GA4 exports to work from
+- claude-seo for analysis of a real site
 - marketingskills for channel strategy above the page level
 
-Two overlaps worth splitting. AI search has three skills: `seo-geo` (claude-seo)
-and `geo-content-optimizer` (aaron) make content citable by answer engines,
-while `seo-agentic` (claude-seo, v2.4.0) makes a site operable by agents —
-robots.txt Content-Signal, llms.txt, /.well-known discovery, WebMCP.
-marketingskills' `ai-seo` spans both, as strategy. And for analytics,
-`seo-matomo` is the Matomo counterpart to `seo-google`'s GA4.
+AI search: `seo-geo` (claude-seo) makes content citable by answer engines, while
+`seo-agentic` makes a site operable by agents — robots.txt Content-Signal,
+llms.txt, /.well-known discovery, WebMCP. marketingskills' `ai-seo` spans both,
+as strategy. For analytics, `seo-matomo` is the Matomo counterpart to
+`seo-google`'s GA4.
 
 In this environment claude-seo cannot fetch URLs: its SSRF guard refuses the
-loopback egress proxy. So prefer the aaron seo-geo skills here, or fetch the
-page with WebFetch and hand the content to claude-seo.
+loopback egress proxy. For a single page, fetch it with WebFetch and hand the
+content to the skill rather than letting the skill crawl.
 
 These skills' descriptions are bilingual (English plus Chinese trigger
 phrases). That is upstream text, not a language preference.
@@ -234,11 +235,10 @@ every chat. Trigger them on request ("caveman mode", "be brief", "fewer
 tokens"), not unprompted — compressed prose is a deliberate trade, not a
 default.
 
-The repo's other skills are Claude Code only and mostly need its CLI or cloud
-proxy: `caveman-setup`, `caveman-stats`, `caveman-manage`, `cavecrew`. The
-pure-prose ones — `investigate-first`, `safe-refactor`, `surgical-patch`,
-`verify-and-stop`, `lean-build` — say much the same as
-`karpathy-guidelines`; one of them is enough, do not stack them.
+Also installed: `caveman-explore` (read-only orientation, path:line citations),
+`caveman-commit`, `caveman-help` and `cavecrew` (delegation to compressed
+sub-agents). The cloud-gateway skills were removed; they need a service this
+environment does not have.
 
 ## Docs lookup
 

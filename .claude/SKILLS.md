@@ -1,6 +1,6 @@
 # Installed skills
 
-172 skills, provisioned into every session on this repo by the
+146 skills, provisioned into every session on this repo by the
 SessionStart hooks in `.claude/settings.json`. Regenerate with
 `bash .claude/scripts/list-skills.sh`.
 
@@ -115,23 +115,13 @@ rather than only Claude Code) are listed separately at the end.
 
 - **cavecrew** —  When to delegate to `cavecrew-investigator` (locate code), `cavecrew-builder` (1-2 file edit) or `cavecrew-reviewer` (diff review) instead of working inline or using `Explore`.
 - **caveman-commit** —  Write a Conventional Commits message compressed to intent only.
-- **caveman-compress** —  Compress a memory file such as CLAUDE.md or a todo list into caveman format to save input tokens, keeping a readable backup.
-- **caveman-discover** —  Find and label every LLM workflow in the repository so Caveman Cloud groups spend by workflow instead of one bucket.
-- **caveman-evidence-review** —  Read-only review of Caveman Cloud evidence: cost, Cave Score, workflows, traces, latency, errors, routing, savings.
 - **caveman-explore** — Read-only repository explorer for cold-start orientation, broad cross-file localization, or when a direct search failed.
 - **caveman-help** —  Quick-reference card for the three caveman skills and their commands.
-- **caveman-learn** — Act on a Caveman learn report - review the ranked token sinks, apply cost-lowering fixes with per-edit consent, and report what those fixes returned.
-- **caveman-manage** —  Inspect Caveman Cloud's experiment lifecycle and block unsafe execution.
-- **caveman-optimize** —  Turn a Caveman optimization observation into an operator-chosen candidate with a paired baseline evaluation.
-- **caveman-setup** —  Wire a repository through the Caveman Cloud gateway so every LLM request is measured, with no behavior change.
-- **caveman-stats** —  Show recorded output and cache-read token usage and mode attribution for the current Claude Code session, or locate the host's native usage report.
 - **investigate-first** — Diagnose ambiguous failures before editing.
 - **lean-build** — Build feature work with high overbuilding risk.
-- **megacave** —  Caveman in Classical Chinese: 文言文 register, far fewer characters, technical terms verbatim.
 - **migration** — Implement reversible compatibility-safe transitions.
 - **safe-refactor** — Restructure code while preserving behavior.
 - **surgical-patch** — Fix bugs and small behavior changes at the narrowest responsible layer.
-- **ultracave** —  Caveman at maximum compression: fragments, one word when one word is enough, each fact once.
 - **verify-and-stop** — Prove existing work meets acceptance conditions without expanding scope.
 
 ## emilkowalski/skills
@@ -155,25 +145,6 @@ rather than only Claude Code) are listed separately at the end.
 - **remove-animations** — Find the animations an interface doesn't need and remove them — motion on keyboard actions, high-frequency surfaces, functional data, and decoration with no purpose — then clean up what they leave
 - **review-animations** — Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy.
 - **write-swift** — How to write modern Swift well — modeling with value types, Swift 6 data-race safety and approachable concurrency (@concurrent, main-actor-by-default, actors, task groups), protocols and generics (s
-
-## aaron-he-zhu/aaron-marketing-skills
-
-- **competitor-analysis** — 'Use when the user asks to "analyze competitors" or "竞品分析"; benchmarks competitor keywords, content, backlinks, AI citations, and traffic share into strengths, weaknesses, and an action plan.
-- **content-gap-analysis** — 'Use when the user asks to "find content gaps", "竞品写了什么", or "还应该写什么"; builds a competitor-relative coverage map of missing topics, keyword gaps, and editorial-calendar opportu
-- **content-quality-auditor** — 'Use when auditing content quality, E-E-A-T, or publish readiness; runs a typed 80-item CORE-EEAT profile with evidence coverage, veto checks, and a fix plan.
-- **content-writer** — 'Use when the user asks to "write SEO content", "draft a blog post / landing page", "update outdated content", or "fix traffic/ranking decay"; two modes — new drafts pages with keywords, headers, sn
-- **domain-authority-auditor** — 'Use when auditing domain authority, trust, or citation credibility; runs a peer-relative 40-item CITE profile with evidence coverage and verified manipulation/penalty veto checks.
-- **geo-content-optimizer** — 'Use when the user asks to "optimize for AI citations"; improves citation readiness for ChatGPT, Perplexity, AI Overviews, Gemini, and Claude.
-- **keyword-research** — 'Use when the user asks to "find keywords", "挖词", or "搜什么词"; prioritizes search volume, keyword difficulty, intent, and topic clusters from provided or connected data.
-- **offsite-signal-analyzer** — 'Use when the user asks to "analyze backlinks", "analyze my off-site signals", or "track AI traffic / ChatGPT / Perplexity referrals"; profiles referring domains, anchor-text mix, toxic links, and dis
-- **on-page-seo-checker** — 'Use when the user asks to "audit on-page SEO" or "diagnose why a single page dropped"; scores titles, meta, header structure, keyword placement, links, and images with prioritized fixes.
-- **page-play-builder** — 'Use when the user asks to "build programmatic SEO pages", "generate pages at scale", "rank on a high-authority third-party site", "borrow domain authority", "build a vs / alternative page", "do local
-- **performance-monitor** — 'Use when the user asks to "generate an SEO report", "出月报", "set SEO alerts", or "排名掉了提醒我"; two modes — report builds multi-metric traffic/ranking/authority/content dashboards, a
-- **rank-tracker** — 'Use when the user asks to "track rankings" or "查排名"; measures keyword and SERP-position deltas over time from provided exports or connected tools, including AI-response checks.
-- **serp-analysis** — 'Use when the user asks to "analyze the SERP" or "SERP分析"; maps SERP features, layout, ranking factors, search intent, AI Overviews, and snippet opportunities for a query.
-- **serp-markup-builder** — 'Use when the user asks to "optimize meta tags", "write title tags / meta descriptions", "add Open Graph or Twitter cards", or "generate schema / JSON-LD" for FAQ, HowTo, Article, Product, or LocalBus
-- **site-structure-optimizer** — 'Use when the user asks to "plan my site structure", "design the page hierarchy / navigation / URL taxonomy", "fix internal linking", or "find orphan pages"; runs two modes — architecture (hierarchy
-- **technical-seo-checker** — 'Use when the user asks to "check technical SEO"; audits crawlability, indexing, Core Web Vitals, robots.txt, sitemaps, canonicals, redirects, and migrations.
 
 ## Other
 
