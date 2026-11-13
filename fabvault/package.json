@@ -1,0 +1,35 @@
+{
+  "name": "fabvault",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "FabVault — maker profile, slicer preset and material library hub (Astro 5 SSG for Cloudflare Pages).",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "generate:data": "tsx scripts/generate-data.ts",
+    "check": "astro check",
+    "verify": "astro check && tsx scripts/verify.ts",
+    "build": "astro build",
+    "verify:dist": "tsx scripts/verify-dist.ts",
+    "preview": "astro preview",
+    "package": "node scripts/build-phase1-zip.mjs",
+    "ci": "npm run generate:data && npm run verify && npm run build && npm run verify:dist"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/tailwind": "^6.0.2",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "astro": "^5.18.2",
+    "tailwindcss": "^3.4.19"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@types/node": "^26.6.6",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
