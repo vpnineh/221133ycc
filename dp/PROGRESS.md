@@ -13,3 +13,14 @@ Recovery: `sh dp/setup.sh` (downloads HistData + Dropbox US30, builds bins and h
 | v13.13 | 2.28 | 2.26 | 8.37 | -3.84 | 2.30 / 8.37 / -3.84 |
 | v13.12 | 2.21 | 2.17 | 9.92 | -3.65 | 2.23 / 9.92 / -3.65 |
 | v13.13 VF=0 OVR=P.7=0.10,SLK.3=2.0 | identical to v13.12 | | | | |
+
+## More baselines on our data (v13.13)
+- LH 2010-06..2015-12 100k: v13.13 +122.6% (ref 222,616 end), v13.12 +114.1%.
+- Challenge 39 starts (100k, abandon -6%): median 93 d, P(<=90d) 47.5%, pass/attempt 77%.
+- Fresh funded 39 x 24 mo, monthly payout: 2.12 %/mo, worst day -3.58, min eq p0 91.6k.
+- Funded 2024-26 payouts: 10k 2.24 / 25k 2.99 / 100k 3.11 %/mo.
+- 100k 10y monthly: mean 2.27, std 3.62, 32/130 negative months, worst -7.2% (2022-01).
+- Offline month-lock: profit lock does not cut negative months (32 -> 28-30) and costs 0.3-1.0 %/mo. Loss brake (MTD<=-2% -> x0.5):
+  worst month -7.2 -> -5.3, DD 8.0 -> 7.0, mean -0.05.
+## Experiments (budget ~40 configs)
+- S2 lot dithering for small accounts: REJECTED (see prereg/PREREG_v13.14.txt). ~12 configs used.

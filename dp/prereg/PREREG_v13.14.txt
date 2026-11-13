@@ -1,0 +1,24 @@
+PREREG v13.14 (registered 2026-11-13 before any run of the rule). Baseline F = v13.13 default, our data build (validated: 100k funded
+2.28 %/mo, mDD 8.37, wDay -3.84; LH 2010-06..2015-12 ends 222.6k; challenge median 93d; fresh funded 2.12 %/mo).
+Standing acceptance rule (unchanged from v13.13): %/mo higher, mDD not worse by > 0.3 pt, 2x costs same direction, LH veto, no day < -3.9%.
+Experiment budget: at most ~40 harness configurations in total for v13.14; when spent, ship the best validated version and state the gap.
+
+S2 SMALL-ACCOUNT LOT DITHERING. Problem measured (funded 2024-01..2026-10, monthly payouts): 10k 2.24 / 25k 2.99 / 100k 3.11 %/mo.
+  10k loses (a) 437 signals refused "min-lot risk" (GOLD T60 113, SILV 91, GOLD MOM 85, GOLD T240 43, DOW IBS 38 ...) and
+  (b) lot-step truncation (floor) of small lots (NAS IBS same trade count, 1.3% vs 6.5%).
+  Rule (deterministic, no look-ahead): per-sleeve carry c_k (persisted). Exact lots x = risk_money / loss_per_lot.
+  Only when x < N*step (N = 5; at 100k no sleeve is below this, so 100k must stay trade-for-trade identical):
+    if x < vmin: frac = x / vmin; hard cap unchanged (min-lot risk <= InpMaxRiskPerTradeR x base risk, else refuse);
+                 c_k += frac; if c_k >= 1: trade vmin, c_k -= 1; else skip ("min-lot dither").
+    else: base = floor(x/step)*step, frac = (x-base)/step; c_k += frac; if c_k >= 1: base+step (only if its risk <= MAXRT x base), c_k -= 1.
+  Expected exposure per sleeve = planned exposure (size-invariant in expectation).
+  Variants: DITH=2 (above, primary); DITH=1 (keep today's raise-to-min-lot when <= 1.5x, dither only the refused signals).
+  Accept for the EA only if: 10k funded 2024-26 %/mo >= +15% relative AND worst day >= -3.9% AND min equity above the guard (-9%);
+  25k not worse; 100k identical; then 10y 10k funded x1 and x2 not worse than F-10k, LH 10k not worse, 10k challenge 39 starts not slower.
+--- S2 RESULT (2026-11-13): REJECTED.
+  2024-01..2026-10 payouts (%/mo, worst day, min eq): 10k F 2.24/-3.20/-3.99; DITH=2 3.01/-4.08/-5.38 (worst day fails -3.9);
+  DITH=1 2.59/-4.08/-6.36; 25k F 2.99 -> DITH=2 2.93 (min eq -6.26), DITH=1 2.93; 100k DITH=1 identical, DITH=2 3.22 (not identical).
+  10y 10k funded (fixed risk): F 2.08 %/mo, worst month -5.08% of initial, 32 neg; DITH=2 2.16, worst month -10.44, 35 neg;
+  DITH=2 MAXRT=1.5 2.23, -9.45, 33 neg. Gain is a 2024-26 effect only (+4..7% relative over 10y, < +15%) and the monthly tail doubles
+  (dithered min-lot trades are 1.5-2x the planned risk). Worst days at 10k = metals open-profit giveback (2025-10-17), same as F.
+  Conclusion: 10k = 25k parity is not reachable by sizing tricks with 0.01-lot gold/silver/index contracts at 2025-26 prices.
