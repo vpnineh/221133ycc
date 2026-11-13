@@ -6,3 +6,5 @@ bt/out*/
 bt/work/
 *.npy
 *.bin
+bt/data/zips*/
+__pycache__/
