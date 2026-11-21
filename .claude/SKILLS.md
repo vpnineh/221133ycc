@@ -1,6 +1,6 @@
 # Installed skills
 
-146 skills, provisioned into every session on this repo by the
+150 skills, provisioned into every session on this repo by the
 SessionStart hooks in `.claude/settings.json`. Regenerate with
 `bash .claude/scripts/list-skills.sh`.
 
@@ -13,6 +13,7 @@ rather than only Claude Code) are listed separately at the end.
 - **component-canvas** — Build a full-screen, interactive canvas to explore existing UI components and their variants with pan and zoom.
 - **create-canvas** — Build a freeform canvas to explore, compare, and iterate on anything.
 - **create-design-md** — Create or update a DESIGN.md from an existing product repository or public website.
+- **device-frames** — Create device-framed screenshots, product images, videos, or live UI mockups.
 - **fixing-accessibility** — Audit and fix HTML accessibility issues including ARIA labels, keyboard navigation, focus management, color contrast, and form errors.
 - **fixing-metadata** —  Audit and fix HTML metadata including page titles, meta descriptions, canonical URLs, Open Graph tags, Twitter cards, favicons, JSON-LD structured data, and robots directives.
 - **fixing-motion-performance** — Audit and fix animation performance issues including layout thrashing, compositor properties, scroll-linked motion, and blur effects.
@@ -39,7 +40,7 @@ rather than only Claude Code) are listed separately at the end.
 
 - **banner-design** — Design banners for social media, ads, website heroes, creative assets, and print.
 - **brand** — Brand voice, visual identity, messaging frameworks, asset management, brand consistency.
-- **design** — Comprehensive design skill: brand identity, design tokens, UI styling, logo generation (55 styles, Gemini, Atlas Cloud, or MuAPI AI), corporate identity program (50 deliverables, CIP mockups), HTML pr
+- **design** — Comprehensive design skill: brand identity, design tokens, UI styling, logo generation (55 styles, Gemini, Atlas Cloud, MuAPI, or UberLLM AI), corporate identity program (50 deliverables, CIP mockups)
 - **design-system** — Token architecture, component specifications, and slide generation.
 - **slides** — Create strategic HTML presentations with Chart.js, design tokens, responsive layouts, copywriting formulas, and contextual slide strategies.
 - **ui-styling** — Create beautiful, accessible user interfaces with shadcn/ui components (built on Radix UI + Tailwind), Tailwind CSS utility-first styling, and canvas-based visual designs.
@@ -84,7 +85,7 @@ rather than only Claude Code) are listed separately at the end.
 - **influencer-marketing** — When the user wants creator, influencer, or ambassador partnerships, or asks which creators fit, what to pay, which rights to buy, or whether a sponsorship worked: vetting, contracts, briefs, UGC, new
 - **launch** — When the user wants to plan a product or feature launch, or asks whether it's ready, when to announce, or how to get noticed: Product Hunt, beta and early access, waitlists, release go-to-market, laun
 - **lead-magnets** — When the user wants to plan or improve a lead magnet, or asks what to give away for emails or how much to ask in return (gating, form fields): checklists, templates, ebooks, gated guides, content upgr
-- **link-building** — When the user wants backlinks and mentions that lift rankings and AI citations, or asks how to get sites to link or whether a link tactic is safe: link gaps, unlinked mentions, broken links, guest pos
+- **link-building** — When the user wants backlinks and mentions that lift rankings and AI citations, or asks how to get sites to link, whether a link tactic is safe, or where to buy placements: link gaps, unlinked mention
 - **marketing-council** — When the user wants several expert takes on a marketing decision, or asks what a famous marketer would say about it: a simulated board (Seth Godin, David Ogilvy, April Dunford, Byron Sharp, and more),
 - **marketing-ideas** — When the user wants marketing ideas or growth tactics for a software product, or asks what to try to get attention or the next customers with little time or budget, or after the obvious channels.
 - **marketing-loops** — When the user wants a recurring marketing job an AI agent runs on a cadence or trigger, or asks what a weekly or daily automated check should do, remember, and when it should stop: SEO and ads checks,
@@ -126,14 +127,15 @@ rather than only Claude Code) are listed separately at the end.
 
 ## emilkowalski/skills
 
-- **animate** — Build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and dura
-- **animate-expo** — Build animations in React Native and Expo, making the decisions in the order that determines whether they feel right — should it animate, which thread it runs on, which properties, spring or timing,
+- **animate** — Build an animation from scratch, making the decisions in the order that determines whether it feels right — should it animate at all, what purpose, which tool, which properties, which curve and durati
+- **animate-expo** — Build animations in React Native and Expo, making the decisions in the order that determines whether they feel right — should it animate, which thread it runs on, which properties, spring or timing, h
 - **animation-performance** — Keep web animations inside the frame budget — animate composite-only properties, keep motion off the main thread when the page is busy, and find the cause when an animation drops frames.
-- **animation-vocabulary** — Reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in; "the iOS rubber-band scroll" → Rub
+- **animation-vocabulary** — Reverse-lookup glossary that turns a vague description of a web animation or motion effect into its exact term ("the bouncy thing when a popover opens" → Pop in; "the iOS rubber-band scroll" → Rubber-
 - **apple-design** — Apple's approach to interface design and fluid, physical motion, translated for the web.
-- **ask-sonner** — Guide to Sonner, the React toast library — install and wire up the Toaster, pick the right toast() call, promise and loading toasts, updating, dismissing and persisting toasts, styling, theming and
-- **break-ui** — Try to break a piece of UI by feeding it worst-case data — long names, unbreakable emails, one-letter names, missing fields, huge counts, zero items, long labels, non-Latin text, emoji, extreme numb
-- **choreograph** — Coordinate several elements that animate together — decide what moves, in what order, how much they overlap, and what stays still — so a group reads as one intentional motion instead of a pile of
+- **ask-emil** — Ask which skill or flow fits your situation.
+- **ask-sonner** — Guide to Sonner, the React toast library — install and wire up the Toaster, pick the right toast() call, promise and loading toasts, updating, dismissing and persisting toasts, styling, theming and ic
+- **break-ui** — Try to break a piece of UI by feeding it worst-case data — long names, unbreakable emails, one-letter names, missing fields, huge counts, zero items, long labels, non-Latin text, emoji, extreme number
+- **choreograph** — Coordinate several elements that animate together — decide what moves, in what order, how much they overlap, and what stays still — so a group reads as one intentional motion instead of a pile of sepa
 - **emil-design-eng** — Emil Kowalski's design-engineering philosophy for UI polish, component design, animation decisions, and the invisible details that make software feel great.
 - **find-animation-opportunities** — Search a codebase or UI for places that don't animate but should, and reject everything that shouldn't.
 - **gestures** — Build drag, swipe, and sheet interactions that track the finger 1:1 and stay interruptible.
@@ -142,15 +144,15 @@ rather than only Claude Code) are listed separately at the end.
 - **mobile-native** — Make a web app feel native on a phone — the small CSS and meta-tag fixes that separate "a website in a browser" from something that feels installed.
 - **pick-ui-library** — Pick the library for a frontend task from a curated list — primitives, toasts, drawers, command menus, OTP, numbers, charts, virtualization, drag and drop, state, styling.
 - **prototype** — Build multiple genuinely different versions of a UI piece you describe, rendered behind a visual picker so you can flip through them live and promote the one that feels right.
-- **remove-animations** — Find the animations an interface doesn't need and remove them — motion on keyboard actions, high-frequency surfaces, functional data, and decoration with no purpose — then clean up what they leave
+- **remove-animations** — Find the animations an interface doesn't need and remove them — motion on keyboard actions, high-frequency surfaces, functional data, and decoration with no purpose — then clean up what they leave beh
 - **review-animations** — Reviews animation and motion code against a high craft bar derived from Emil Kowalski's design engineering philosophy.
-- **write-swift** — How to write modern Swift well — modeling with value types, Swift 6 data-race safety and approachable concurrency (@concurrent, main-actor-by-default, actors, task groups), protocols and generics (s
+- **write-swift** — How to write modern Swift well — modeling with value types, Swift 6 data-race safety and approachable concurrency (@concurrent, main-actor-by-default, actors, task groups), protocols and generics (som
 
 ## Other
 
 claude-seo (its own hook), graphify, and anything installed by hand.
 
-- **graphify** — Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first
+- **graphify** — Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first.
 - **seo** — Comprehensive SEO analysis for any website or business type.
 - **seo-agentic** —  Audit and fix agent readiness: the Lighthouse Agentic Browsing fraction, accessibility tree for agents, robots.txt and Content-Signal for AI agents, WAF treatment of agent traffic, llms.txt, Markdown
 - **seo-ahrefs** — Ahrefs API analyst (extension).
@@ -176,10 +178,12 @@ claude-seo (its own hook), graphify, and anything installed by hand.
 - **seo-matomo** — Matomo Reporting API extension.
 - **seo-page** —  Analyze one supplied URL across on-page, content, technical metadata, schema, images, and performance.
 - **seo-plan** —  Strategic SEO planning for new or existing websites.
+- **seo-posthog** — PostHog MCP extension.
 - **seo-profound** — Profound LLM citation tracker (extension).
 - **seo-programmatic** —  Programmatic SEO planning and analysis for pages generated at scale from data sources.
 - **seo-schema** —  Detect, validate, or generate Schema.org JSON-LD for a supplied page or entity.
 - **seo-seranking** — SE Ranking AI visibility analyst (extension).
+- **seo-shopify** — Uncapped, sitemap-complete crawl of a Shopify storefront using the merchant's Crawler Access signature from a project-local .shopify-env, feeding the standard seo-audit pipeline.
 - **seo-sitemap** —  Analyze existing XML sitemaps or generate new ones with industry templates.
 - **seo-sxo** —  Diagnose search-experience and intent mismatches using SERP page types, user stories, and persona scoring.
 - **seo-technical** —  Audit technical SEO across crawlability, indexability, security, URLs, mobile, Core Web Vitals, rendering, structured data, and IndexNow.
